@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GEBOY SHOP | Products</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">G</span><span>GEBOY <b>SHOP</b></span></div>
+      <div class="store-select">All Stores <span>⌄</span></div>
+      <nav>
+        <a href="#" class="nav-link"><span>▦</span> Dashboard</a>
+        <a href="#" class="nav-link"><span>▣</span> Stores</a>
+        <a href="index.html" class="nav-link active"><span>▤</span> Products</a>
+        <a href="#" class="nav-link"><span>🛒</span> Orders</a>
+        <a href="#" class="nav-link"><span>♧</span> Customers</a>
+        <a href="#" class="nav-link"><span>▦</span> Categories</a>
+        <a href="#" class="nav-link"><span>⌁</span> Analytics</a>
+        <a href="#" class="nav-link"><span>⇄</span> Inventory Sync</a>
+        <a href="#" class="nav-link"><span>◷</span> Profit Dashboard</a>
+        <a href="#" class="nav-link"><span>♙</span> User Management</a>
+        <a href="#" class="nav-link"><span>⚙</span> Settings</a>
+      </nav>
+      <div class="sidebar-bottom">GEBOY SHOP <small>Store management</small></div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div><p class="eyebrow">STORE MANAGEMENT</p><h1>Products</h1><p class="subheading">Manage products across all your stores</p></div>
+        <div class="top-actions">
+          <button class="btn btn-ghost" id="exportBtn">⇩ Export</button>
+          <button class="btn btn-ghost" id="syncBtn">⟳ Sync</button>
+          <button class="btn btn-green" id="addProductBtn">＋ Add Product</button>
+          <a class="cart-shortcut" href="cart.html">🛒 <span id="cartCount">0</span></a>
+        </div>
+      </header>
+
+      <section class="stats-grid">
+        <article class="stat-card"><div><strong id="totalProducts">8</strong><span>Total Products</span></div><i>▦</i></article>
+        <article class="stat-card"><div><strong>8</strong><span>Published</span></div><i>◉</i></article>
+        <article class="stat-card"><div><strong>0</strong><span>Draft</span></div><i>▧</i></article>
+        <article class="stat-card"><div><strong>2</strong><span>Low Stock</span></div><i>♧</i></article>
+        <article class="stat-card"><div><strong>1</strong><span>Out of Stock</span></div><i>▣</i></article>
+      </section>
+
+      <section class="toolbar">
+        <label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="Search products by name or SKU..."></label>
+        <select id="categoryFilter" aria-label="Filter kategori">
+          <option value="all">All Categories</option><option value="Tools">Tools</option><option value="Power Tools">Power Tools</option><option value="Machine Tools">Machine Tools</option><option value="Accessories">Accessories</option>
+        </select>
+        <button class="btn btn-ghost" id="refreshBtn">⟳ Refresh</button>
+        <button class="view-toggle selected" aria-label="Grid view">▦</button>
+      </section>
+
+      <section class="product-grid" id="productGrid"></section>
+      <footer class="page-footer">Showing <span id="shownCount">8</span> products · GEBOY SHOP</footer>
+    </main>
+  </div>
+
+  <dialog id="productDialog" class="product-dialog">
+    <form method="dialog" id="productForm">
+      <div class="dialog-heading"><div><p class="eyebrow">NEW ITEM</p><h2>Add Product</h2></div><button class="close-btn" value="cancel" aria-label="Tutup">×</button></div>
+      <label>Product name<input id="newName" required placeholder="Contoh: Cordless Drill"></label>
+      <label>Category<select id="newCategory"><option>Tools</option><option>Power Tools</option><option>Machine Tools</option><option>Accessories</option></select></label>
+      <label>Price (USD)<input id="newPrice" type="number" min="1" required placeholder="99.00"></label>
+      <label>Image URL<input id="newImage" placeholder="https://... (opsional)"></label>
+      <button class="btn btn-green full" type="submit">Save Product</button>
+    </form>
+  </dialog>
+  <div class="toast" id="toast"></div>
+  <script src="js/app.js"></script>
+</body>
+</html>
