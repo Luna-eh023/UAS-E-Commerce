@@ -9,7 +9,6 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 
-
 export type OrderStatus = "gudang" | "disortir" | "diantar" | "sampai";
 
 export type OrderItem = {
@@ -40,8 +39,6 @@ export type Order = {
 
 type NewOrder = Omit<Order, "id">;
 
-
-
 const ORDERS = "orders";
 
 export const REFUND_WINDOW_DAYS = 3;
@@ -67,16 +64,18 @@ export const STATUS_COLOR: Record<OrderStatus, string> = {
   sampai: "success",
 };
 
-
 const PRODUCT_IMAGES: Record<string, string> = {
   "Earphone Bluetooth TWS": "/images/tws.jpg",
   "Kabel USB-C 1m": "/images/kabelusb.jpg",
+  "Mouse Wireless Slim": "/images/mousewireless.webp",
+  "Casing HP Anti Crack": "/images/casinghp.jpg",
+  "Power Bank 10000mAh": "/images/powerbank10000mah.webp",
+  "Keyboard Mekanik": "/images/keyboardmekanik.jpg",
 };
 
 export function getItemImage(item: OrderItem): string | null {
   return PRODUCT_IMAGES[item.name] ?? null;
 }
-
 
 export function formatRupiah(value: number): string {
   return new Intl.NumberFormat("id-ID", {
@@ -97,7 +96,6 @@ export function calcTotal(items: OrderItem[]): number {
   return items.reduce((sum, item) => sum + item.price * item.qty, 0);
 }
 
-
 export function getRefundDeadline(arrivedAt: string): Date {
   return new Date(
     new Date(arrivedAt).getTime() + REFUND_WINDOW_DAYS * 24 * 60 * 60 * 1000
@@ -110,7 +108,6 @@ export function canRefund(order: Order): boolean {
   }
   return Date.now() <= getRefundDeadline(order.arrivedAt).getTime();
 }
-
 
 export async function getOrders(): Promise<Order[]> {
   const q = query(collection(db, ORDERS), orderBy("createdAt", "desc"));
@@ -166,7 +163,6 @@ export async function buyAgain(order: Order): Promise<void> {
   };
   await addDoc(collection(db, ORDERS), newOrder);
 }
-
 
 function daysAgo(n: number): string {
   return new Date(Date.now() - n * 24 * 60 * 60 * 1000).toISOString();

@@ -39,7 +39,7 @@ export default function OrderCard({
 
   return (
     <div className="card mb-3 border-0 shadow-sm overflow-hidden">
-      <div className="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4">
+      <div className="card-header bg-body d-flex justify-content-between align-items-center py-3 px-4">
         <div className="d-flex align-items-center gap-2">
           <span className="fw-bold">{order.storeName}</span>
           <span className="text-muted small">
@@ -63,8 +63,9 @@ export default function OrderCard({
               return (
                 <div key={step} className="flex-fill text-center small">
                   <div
-                    className={`rounded-circle mx-auto mb-1 d-flex align-items-center justify-content-center text-white ${done ? "bg-success" : "bg-secondary-subtle"
-                      }`}
+                    className={`rounded-circle mx-auto mb-1 d-flex align-items-center justify-content-center text-white ${
+                      done ? "bg-success" : "bg-secondary-subtle"
+                    }`}
                     style={{ width: 28, height: 28 }}
                   >
                     {done ? "✓" : i + 1}
@@ -84,8 +85,8 @@ export default function OrderCard({
                 <div className="mt-1">
                   {refundable
                     ? `Dana bisa dikembalikan sampai ${formatTanggal(
-                      getRefundDeadline(order.arrivedAt).toISOString()
-                    )} (maks ${REFUND_WINDOW_DAYS} hari setelah sampai).`
+                        getRefundDeadline(order.arrivedAt).toISOString()
+                      )} (maks ${REFUND_WINDOW_DAYS} hari setelah sampai).`
                     : `Batas pengembalian dana (${REFUND_WINDOW_DAYS} hari setelah sampai) sudah lewat.`}
                 </div>
               )}
@@ -96,39 +97,38 @@ export default function OrderCard({
             {order.items.map((item, i) => {
               const image = getItemImage(item);
               return (
-                <li
-                  key={`${item.name}-${i}`}
-                  className="d-flex align-items-center gap-3 py-2"
-                >
-                  <div className="item-thumb">
-                    {image ? (
-                      <Image
-                        src={image}
-                        alt={item.name}
-                        width={72}
-                        height={72}
-                        style={{ objectFit: "cover", width: "100%", height: "100%" }}
-                      />
-                    ) : (
-                      item.name.charAt(0)
-                    )}
-                  </div>
-                  <div className="flex-grow-1">
-                    <div className="fw-semibold">{item.name}</div>
-                    {item.variant && (
-                      <div className="text-muted small">{item.variant}</div>
-                    )}
-                  </div>
-                  <div className="text-end">
-                    <div>{formatRupiah(item.price)}</div>
-                    <div className="text-muted small">x{item.qty}</div>
-                  </div>
-                </li>
+              <li
+                key={`${item.name}-${i}`}
+                className="d-flex align-items-center gap-3 py-2"
+              >
+                <div className="item-thumb">
+                  {image ? (
+                    <Image
+                      src={image}
+                      alt={item.name}
+                      width={72}
+                      height={72}
+                      style={{ objectFit: "cover", width: "100%", height: "100%" }}
+                    />
+                  ) : (
+                    item.name.charAt(0)
+                  )}
+                </div>
+                <div className="flex-grow-1">
+                  <div className="fw-semibold">{item.name}</div>
+                  {item.variant && (
+                    <div className="text-muted small">{item.variant}</div>
+                  )}
+                </div>
+                <div className="text-end">
+                  <div>{formatRupiah(item.price)}</div>
+                  <div className="text-muted small">x{item.qty}</div>
+                </div>
+              </li>
               );
             })}
           </ul>
         </div>
-
 
         <div className="col-lg-4 p-4 order-side d-flex flex-column">
           <div className="text-muted small">
@@ -139,7 +139,7 @@ export default function OrderCard({
           </div>
 
           {order.review && (
-            <div className="bg-white border rounded p-2 small mb-3">
+            <div className="bg-body border rounded p-2 small mb-3">
               <div className="text-warning">
                 {"★".repeat(order.review.rating)}
                 {"☆".repeat(5 - order.review.rating)}

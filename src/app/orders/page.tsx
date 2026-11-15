@@ -92,7 +92,6 @@ export default function OrdersPage() {
     }
   };
 
-
   const handleSeed = () =>
     run(seedOrders, "Data contoh berhasil dibuat.");
 
@@ -132,7 +131,6 @@ export default function OrdersPage() {
     await run(() => refundOrder(target.id), "Pengajuan pengembalian dana berhasil.");
   };
 
-
   const visibleOrders =
     filter === "semua" ? orders : orders.filter((o) => o.status === filter);
 
@@ -145,7 +143,7 @@ export default function OrdersPage() {
 
       <Nav
         variant="pills"
-        className="flex-nowrap overflow-auto bg-white rounded shadow-sm p-2 mb-3"
+        className="flex-nowrap overflow-auto bg-body rounded shadow-sm p-2 mb-3"
         activeKey={filter}
         onSelect={(key) => setFilter((key ?? "semua") as Filter)}
       >
