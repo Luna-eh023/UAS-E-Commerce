@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
@@ -139,8 +140,15 @@ export default function OrdersPage() {
 
   return (
     <main className="container py-4">
-      <h1 className="h3 fw-bold mb-3">Status Pesanan</h1>
-
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h1 className="h3 fw-bold mb-0">Status Pesanan</h1>
+        <Link
+          href="/notifikasi"
+          className="btn btn-outline-primary rounded-pill px-3"
+        >
+          Notifikasi
+        </Link>
+      </div>
       <Nav
         variant="pills"
         className="flex-nowrap overflow-auto bg-body rounded shadow-sm p-2 mb-3"
