@@ -27,6 +27,7 @@ export type Review = {
 export type Order = {
   id: string;
   storeName: string;
+  storeLogo?: string | null;
   items: OrderItem[];
   total: number;
   status: OrderStatus;
@@ -77,6 +78,12 @@ export function getItemImage(item: OrderItem): string | null {
   return PRODUCT_IMAGES[item.name] ?? null;
 }
 
+const STORE_LOGOS: Record<string, string> = {
+  "TechZone Official": "/images/pppenjual1.jpg",
+  "Gadget Mart": "/images/pppenjual3.jpg",
+  "Kreasi Case ID": "/images/pppenjual4.jpg",
+};
+
 export function formatRupiah(value: number): string {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -119,6 +126,21 @@ export async function getOrders(): Promise<Order[]> {
   }));
 }
 
+export async function backfillStoreLogos(orders: Order[]): Promise<Order[]> {
+  return Promise.all(
+    orders.map(async (order) => {
+      const logo = STORE_LOGOS[order.storeName];
+      if (order.storeLogo || !logo) return order;
+      try {
+        await updateDoc(doc(db, ORDERS, order.id), { storeLogo: logo });
+      } catch (err) {
+        console.error(err);
+      }
+      return { ...order, storeLogo: logo };
+    })
+  );
+}
+
 export async function advanceStatus(order: Order): Promise<void> {
   const next = STATUS_FLOW[STATUS_FLOW.indexOf(order.status) + 1];
   if (!next) return;
@@ -152,6 +174,7 @@ export async function refundOrder(orderId: string): Promise<void> {
 export async function buyAgain(order: Order): Promise<void> {
   const newOrder: NewOrder = {
     storeName: order.storeName,
+    storeLogo: order.storeLogo ?? STORE_LOGOS[order.storeName] ?? null,
     items: order.items,
     total: calcTotal(order.items),
     status: "gudang",
@@ -177,6 +200,7 @@ function makeOrder(
 ): NewOrder {
   return {
     storeName,
+    storeLogo: STORE_LOGOS[storeName] ?? null,
     items,
     total: calcTotal(items),
     status,

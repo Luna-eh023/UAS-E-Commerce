@@ -41,6 +41,23 @@ export default function OrderCard({
     <div className="card mb-3 border-0 shadow-sm overflow-hidden">
       <div className="card-header bg-body d-flex justify-content-between align-items-center py-3 px-4">
         <div className="d-flex align-items-center gap-2">
+          {order.storeLogo ? (
+            <Image
+              src={order.storeLogo}
+              alt={order.storeName}
+              width={36}
+              height={36}
+              className="rounded-circle border"
+              style={{ objectFit: "cover" }}
+            />
+          ) : (
+            <div
+              className="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+              style={{ width: 36, height: 36, backgroundColor: "#03ac0e" }}
+            >
+              {order.storeName.charAt(0)}
+            </div>
+          )}
           <span className="fw-bold">{order.storeName}</span>
           <span className="text-muted small">
             • Dipesan {formatTanggal(order.createdAt)}

@@ -16,6 +16,7 @@ import {
   STATUS_FLOW,
   STATUS_LABEL,
   advanceStatus,
+  backfillStoreLogos,
   buyAgain,
   formatRupiah,
   getOrders,
@@ -54,9 +55,10 @@ export default function OrdersPage() {
     let active = true;
 
     getOrders()
-      .then((data) => {
-        if (active) setOrders(data);
-      })
+  .then(backfillStoreLogos)
+  .then((data) => {
+    if (active) setOrders(data);
+  })
       .catch((err) => {
         console.error(err);
         if (active) {
