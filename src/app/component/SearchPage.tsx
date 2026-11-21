@@ -55,9 +55,11 @@ export default function SearchPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
 
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    const keyword = searchTerm.toLowerCase().trim();
+
+    const matchesSearch =
+      product.name.toLowerCase().includes(keyword) ||
+      product.category.toLowerCase().includes(keyword);
 
     const matchesCategory =
       selectedCategory === "All" ||
