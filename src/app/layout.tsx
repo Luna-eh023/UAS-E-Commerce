@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import Script from "next/script";
 import ThemeToggle from "@/components/ThemeToggle";
+import FlashSalePopup from "@/components/FlashSalePopup";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -30,6 +31,8 @@ export default function RootLayout({
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: themeScript }}
         />
+        {children}
+        <FlashSalePopup />
         <header className="bg-body border-bottom shadow-sm sticky-top">
           <div className="container d-flex align-items-center justify-content-between py-3">
             <div className="d-flex align-items-center gap-2">

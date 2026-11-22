@@ -1,0 +1,246 @@
+.content {
+  border: 0;
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+.banner {
+  position: relative;
+  padding: 26px 24px 24px;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(135deg, #03ac0e, #0b8f6a);
+  overflow: hidden;
+}
+
+.banner::before {
+  content: "";
+  position: absolute;
+  top: -70px;
+  left: -50px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.banner::after {
+  content: "";
+  position: absolute;
+  right: -50px;
+  bottom: -90px;
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.banner > * {
+  position: relative;
+  z-index: 1;
+}
+
+.close {
+  position: absolute !important;
+  top: 14px;
+  right: 14px;
+}
+
+.mascotWrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  animation: rise 0.5s ease 0.2s both;
+}
+
+.pillSoon {
+  background: #ffd23f;
+  color: #6b4a00;
+}
+
+.pillLive {
+  background: #fff;
+  color: #d32f2f;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e53935;
+  animation: pulse 1.4s ease-out infinite;
+}
+
+.title {
+  margin: 12px 0 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.countdown {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.box {
+  min-width: 66px;
+  padding: 10px 8px;
+  border-radius: 12px;
+  text-align: center;
+  background: var(--green-soft);
+}
+
+.num {
+  color: var(--digeboy-green);
+  font-size: 1.7rem;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.tick {
+  animation: tick 0.35s ease;
+}
+
+.unit {
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--bs-secondary-color);
+}
+
+.products {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line-color);
+  border-radius: 12px;
+  background: var(--bs-body-bg);
+  animation: rise 0.5s ease both;
+  animation-delay: calc(var(--i) * 0.09s + 0.25s);
+}
+
+.imageWrap {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: var(--green-soft);
+}
+
+.off {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 1;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: #e53935;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.info {
+  padding: 8px 10px 10px;
+}
+
+.pname {
+  overflow: hidden;
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sale {
+  color: var(--digeboy-green);
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.old {
+  color: var(--bs-secondary-color);
+  font-size: 0.7rem;
+  text-decoration: line-through;
+}
+
+.sim {
+  margin-top: 14px;
+  color: var(--bs-secondary-color);
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.simBtn {
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 0.7rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.simActive {
+  color: var(--digeboy-green);
+  font-weight: 700;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tick {
+  from {
+    opacity: 0.3;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 8px rgba(229, 57, 53, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill,
+  .dot,
+  .card,
+  .tick {
+    animation: none;
+  }
+}

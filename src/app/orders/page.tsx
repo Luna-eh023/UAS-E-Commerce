@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
@@ -9,6 +8,7 @@ import Nav from "react-bootstrap/Nav";
 import Spinner from "react-bootstrap/Spinner";
 import Toast from "react-bootstrap/Toast";
 import ToastContainer from "react-bootstrap/ToastContainer";
+import NotificationBell from "@/components/NotificationBell";
 import OrderCard from "@/components/OrderCard";
 import {
   Order,
@@ -38,6 +38,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState<Filter>("semua");
+  const [search, setSearch] = useState("");
 
   const [reviewTarget, setReviewTarget] = useState<Order | null>(null);
   const [rating, setRating] = useState(0);
@@ -55,10 +56,10 @@ export default function OrdersPage() {
     let active = true;
 
     getOrders()
-  .then(backfillStoreLogos)
-  .then((data) => {
-    if (active) setOrders(data);
-  })
+      .then(backfillStoreLogos)
+      .then((data) => {
+        if (active) setOrders(data);
+      })
       .catch((err) => {
         console.error(err);
         if (active) {
@@ -134,23 +135,66 @@ export default function OrdersPage() {
     await run(() => refundOrder(target.id), "Pengajuan pengembalian dana berhasil.");
   };
 
+  const keyword = search.trim().toLowerCase();
+
+  const searched =
+    keyword === ""
+      ? orders
+      : orders.filter(
+          (o) =>
+            o.storeName.toLowerCase().includes(keyword) ||
+            o.items.some((item) => item.name.toLowerCase().includes(keyword))
+        );
+
   const visibleOrders =
-    filter === "semua" ? orders : orders.filter((o) => o.status === filter);
+    filter === "semua" ? searched : searched.filter((o) => o.status === filter);
 
   const countOf = (status: OrderStatus) =>
-    orders.filter((o) => o.status === status).length;
+    searched.filter((o) => o.status === status).length;
 
   return (
     <main className="container py-4">
+      <div className="input-group input-group-lg mb-4 shadow-sm rounded-pill">
+        <span className="input-group-text bg-body rounded-start-pill ps-4">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </span>
+        <input
+          type="text"
+          className={`form-control ${search === "" ? "rounded-end-pill" : ""}`}
+          placeholder="Cari pesanan Anda (nama toko atau barang)"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          aria-label="Cari pesanan"
+        />
+        {search !== "" && (
+          <button
+            type="button"
+            className="btn btn-outline-secondary rounded-end-pill px-3"
+            onClick={() => setSearch("")}
+          >
+            Hapus
+          </button>
+        )}
+      </div>
+
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h1 className="h3 fw-bold mb-0">Status Pesanan</h1>
-        <Link
-          href="/notifikasi"
-          className="btn btn-outline-primary rounded-pill px-3"
-        >
-          Notifikasi
-        </Link>
+        <NotificationBell />
       </div>
+
       <Nav
         variant="pills"
         className="flex-nowrap overflow-auto bg-body rounded shadow-sm p-2 mb-3"
@@ -159,7 +203,7 @@ export default function OrdersPage() {
       >
         <Nav.Item>
           <Nav.Link eventKey="semua" className="text-nowrap">
-            Semua ({orders.length})
+            Semua ({searched.length})
           </Nav.Link>
         </Nav.Item>
         {STATUS_FLOW.map((status) => (
@@ -190,7 +234,9 @@ export default function OrdersPage() {
 
       {!loading && orders.length > 0 && visibleOrders.length === 0 && (
         <p className="text-muted text-center py-4">
-          Tidak ada pesanan dengan status ini.
+          {keyword === ""
+            ? "Tidak ada pesanan dengan status ini."
+            : `Tidak ada pesanan yang cocok dengan "${search.trim()}".`}
         </p>
       )}
 

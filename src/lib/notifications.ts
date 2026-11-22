@@ -6,6 +6,7 @@ import {
   orderBy,
   query,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -72,6 +73,12 @@ export async function getNotifications(): Promise<AppNotification[]> {
       ...(d.data() as Omit<AppNotification, "id">),
     }))
     .filter((n) => typeof n.title === "string");
+}
+
+export async function getUnreadCount(): Promise<number> {
+  const q = query(collection(db, NOTIFICATIONS), where("read", "==", false));
+  const snapshot = await getDocs(q);
+  return snapshot.size;
 }
 
 export async function markRead(id: string): Promise<void> {
