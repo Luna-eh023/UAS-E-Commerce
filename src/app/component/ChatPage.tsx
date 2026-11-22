@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useEffect, useRef, FormEvent } from "react";
 import Link from "next/link";
 import styles from "./ChatPage.module.css";
 
@@ -13,7 +14,6 @@ interface Message {
 
 export default function ChatPage() {
   const [inputMessage, setInputMessage] = useState("");
-
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -29,18 +29,58 @@ export default function ChatPage() {
     },
   ]);
 
+  const [isTyping, setIsTyping] = useState(false);
+  const [chatLoaded, setChatLoaded] = useState(false);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Mengambil chat yang tersimpan di browser
+  useEffect(() => {
+    const savedMessages = localStorage.getItem("digeboy-chat");
+
+    if (savedMessages) {
+      try {
+        const parsedMessages: Message[] = JSON.parse(savedMessages);
+
+        if (Array.isArray(parsedMessages)) {
+          setMessages(parsedMessages);
+        }
+      } catch {
+        localStorage.removeItem("digeboy-chat");
+      }
+    }
+
+    setChatLoaded(true);
+  }, []);
+
+  // Menyimpan chat setiap ada pesan baru
+  useEffect(() => {
+    if (chatLoaded) {
+      localStorage.setItem(
+        "digeboy-chat",
+        JSON.stringify(messages)
+      );
+    }
+
+    // Scroll otomatis ke pesan terbaru
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages, chatLoaded]);
+
   const handleSendMessage = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!inputMessage.trim()) return;
+    const userText = inputMessage.trim();
+
+    if (!userText || isTyping) return;
 
     const now = new Date().toLocaleTimeString("id-ID", {
       hour: "2-digit",
       minute: "2-digit",
     });
 
-    const userText = inputMessage.trim();
-
+    // Membuat pesan dari user
     const newMessage: Message = {
       id: Date.now(),
       text: userText,
@@ -50,40 +90,54 @@ export default function ChatPage() {
 
     setMessages((prev) => [...prev, newMessage]);
     setInputMessage("");
+    setIsTyping(true);
 
+    // Menentukan balasan berdasarkan pesan user
     const text = userText.toLowerCase();
 
     let reply =
-      "Terima kasih telah menghubungi Digeboy E-commerce. Tim kami siap membantu Anda.";
+      "Terima kasih sudah menghubungi Digeboy E-commerce. Ada hal lain yang bisa kami bantu?";
 
     if (text.includes("harga")) {
       reply = "Untuk informasi harga, silakan cek katalog produk kami.";
-    } else if (text.includes("pengiriman")) {
-      reply = "Estimasi pengiriman biasanya 2-5 hari kerja.";
-    } else if (text.includes("pesanan") || text.includes("order")) {
-      reply = "Silakan berikan nomor pesanan Anda untuk pengecekan.";
-    } else if (text.includes("halo") || text.includes("hai")) {
-      reply = "Halo! Senang bisa membantu Anda.";
+    } else if (
+      text.includes("pengiriman") ||
+      text.includes("lacak")
+    ) {
+      reply = "Untuk mengecek pengiriman, silakan buka menu Lacak Pesanan. Kamu bisa mencoba nomor DGB001.";
+    } else if (
+      text.includes("pesanan") ||
+      text.includes("order")
+    ) {
+      reply = "Silakan berikan nomor pesanan kamu agar bisa kami bantu cek.";
+    } else if (
+      text.includes("halo") ||
+      text.includes("hai")
+    ) {
+      reply = "Halo! Senang bisa membantu kamu. Ada yang ingin ditanyakan?";
+    } else if (text.includes("terima kasih")) {
+      reply = "Sama-sama! Terima kasih sudah berbelanja di Digeboy.";
     }
 
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          text: reply,
-          sender: "admin",
-          time: new Date().toLocaleTimeString("id-ID", {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        },
-      ]);
+    // Simulasi balasan dari customer service
+    window.setTimeout(() => {
+      const adminMessage: Message = {
+        id: Date.now() + 1,
+        text: reply,
+        sender: "admin",
+        time: new Date().toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      };
+
+      setMessages((prev) => [...prev, adminMessage]);
+      setIsTyping(false);
     }, 800);
   };
 
   return (
-    <main className={styles.chatPage}>
+    <main className={styles.chatPage} id="chat">
 
       {/* HEADER */}
       <header className={styles.topbar}>
@@ -110,6 +164,8 @@ export default function ChatPage() {
             <input
               type="text"
               placeholder="Search conversations..."
+              disabled
+              aria-label="Search conversations"
             />
           </div>
 
@@ -121,7 +177,9 @@ export default function ChatPage() {
 
             <div className={styles.conversationInfo}>
               <h4>Customer Service</h4>
-              <p>Welcome to STYLEHUB!</p>
+              <p>
+                {messages[messages.length - 1]?.text}
+              </p>
             </div>
 
             <span className={styles.activeLabel}>Active</span>
@@ -173,6 +231,18 @@ export default function ChatPage() {
                 </div>
               </div>
             ))}
+
+            {isTyping && (
+              <div className={styles.adminMessageWrapper}>
+                <div className={styles.adminMessage}>
+                  <p className={styles.typing}>
+                    Customer Service sedang mengetik...
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
           </div>
 
           {/* MESSAGE INPUT */}
@@ -185,9 +255,13 @@ export default function ChatPage() {
               placeholder="Type your message here..."
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
+              maxLength={500}
             />
 
-            <button type="submit">
+            <button
+              type="submit"
+              disabled={!inputMessage.trim() || isTyping}
+            >
               Send ➤
             </button>
           </form>
