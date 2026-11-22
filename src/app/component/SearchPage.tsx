@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -54,18 +55,17 @@ export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
+  // Memfilter produk berdasarkan nama dan kategori
   const filteredProducts = products.filter((product) => {
-    const keyword = searchTerm.toLowerCase().trim();
+    const keyword = searchTerm.toLowerCase();
 
-    const matchesSearch =
-      product.name.toLowerCase().includes(keyword) ||
-      product.category.toLowerCase().includes(keyword);
-
-    const matchesCategory =
+    const nameMatch = product.name.toLowerCase().includes(keyword);
+    const categoryMatch = product.category.toLowerCase().includes(keyword);
+    const filterMatch =
       selectedCategory === "All" ||
       product.category === selectedCategory;
 
-    return matchesSearch && matchesCategory;
+    return (nameMatch || categoryMatch) && filterMatch;
   });
 
   return (
@@ -79,6 +79,7 @@ export default function SearchPage() {
       <div className={styles.searchContainer}>
         <div className={styles.searchBox}>
           <span>⌕</span>
+
           <input
             type="text"
             placeholder="Search for products..."
@@ -123,9 +124,7 @@ export default function SearchPage() {
                 <div className={styles.productInfo}>
                   <span>{product.category}</span>
                   <h3>{product.name}</h3>
-                  <p>
-                    Rp{product.price.toLocaleString("id-ID")}
-                  </p>
+                  <p>Rp{product.price.toLocaleString("id-ID")}</p>
                 </div>
               </div>
             ))}
@@ -134,6 +133,7 @@ export default function SearchPage() {
           <div className={styles.emptyState}>
             <h3>No products found</h3>
             <p>Try searching with another keyword.</p>
+
             <button
               onClick={() => {
                 setSearchTerm("");
