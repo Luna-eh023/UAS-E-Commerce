@@ -6,6 +6,8 @@ import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import FlashSalePopup from "@/components/FlashSalePopup";
 import "./globals.css";
+import AuthProvider from "@/components/AuthProvider";
+import AuthNav from "@/components/AuthNav";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -26,45 +28,48 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" data-bs-theme="light" suppressHydrationWarning>
-      <body>
-        <Script
-          id="theme-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: themeScript }}
-        />
-        <FlashSalePopup />
+      <AuthProvider>
+        <body>
+          <Script
+            id="theme-init"
+            strategy="beforeInteractive"
+            dangerouslySetInnerHTML={{ __html: themeScript }}
+          />
+          <FlashSalePopup />
 
-        <header className="bg-body border-bottom shadow-sm sticky-top">
-          <div className="container d-flex align-items-center justify-content-between py-3">
+          <header className="bg-body border-bottom shadow-sm sticky-top">
+            <div className="container d-flex align-items-center justify-content-between py-3">
 
-            <Link
-              href="/products"
-              className="d-flex align-items-center gap-2 text-decoration-none"
-            >
-              <span className={`logo-mark ${poppins.className}`}>d</span>
-              <span className={`logo-text ${poppins.className}`}>digeboy</span>
-            </Link>
-
-            <div className="d-flex align-items-center gap-3">
               <Link
                 href="/products"
-                className="text-decoration-none text-body d-none d-sm-inline"
+                className="d-flex align-items-center gap-2 text-decoration-none"
               >
-                Produk
+                <span className={`logo-mark ${poppins.className}`}>d</span>
+                <span className={`logo-text ${poppins.className}`}>digeboy</span>
               </Link>
-              <Link
-                href="/orders"
-                className="text-decoration-none text-muted d-none d-sm-inline"
-              >
-                Pesanan Saya
-              </Link>
-              <ThemeToggle />
-            </div>
-          </div>
-        </header>
 
-        {children}
-      </body>
-    </html>
+              <div className="d-flex align-items-center gap-3">
+                <Link
+                  href="/products"
+                  className="text-decoration-none text-body d-none d-sm-inline"
+                >
+                  Produk
+                </Link>
+                <Link
+                  href="/orders"
+                  className="text-decoration-none text-muted d-none d-sm-inline"
+                >
+                  Pesanan Saya
+                </Link>
+                <AuthNav />
+                <ThemeToggle />
+              </div>
+            </div>
+          </header>
+
+          {children}
+        </body>
+      </AuthProvider>
+    </html >
   );
 }
