@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef, FormEvent } from "react";
@@ -12,7 +11,6 @@ import {
   type ChatMessage,
 } from "../../lib/chatService";
 
-/** Pesan pembuka (info pesanan) -- tampil statis, tidak disimpan ke Firestore. */
 interface IntroMessage {
   id: number;
   text: string;
@@ -21,7 +19,7 @@ interface IntroMessage {
 }
 
 interface Conversation {
-  id: string; // dipakai sebagai storeId pada ID dokumen chat
+  id: string;
   sellerId: string;
   productId: string;
   storeName: string;
@@ -160,8 +158,10 @@ function formatTime(date: Date) {
 function formatDayLabel(date: Date) {
   const startOfDay = (d: Date) =>
     new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+
   const diffDays = Math.round(
-    (startOfDay(new Date()) - startOfDay(date)) / (24 * 60 * 60 * 1000)
+    (startOfDay(new Date()) - startOfDay(date)) /
+      (24 * 60 * 60 * 1000)
   );
 
   if (diffDays === 0) return "Hari ini";
@@ -175,21 +175,23 @@ function formatDayLabel(date: Date) {
 }
 
 export default function ChatPage() {
-  const [selectedConversationId, setSelectedConversationId] = useState<string>(
-    conversations[0].id
-  );
+  const [selectedConversationId, setSelectedConversationId] =
+    useState<string>(conversations[0].id);
 
   const [visitorId, setVisitorId] = useState<string | null>(null);
+
   const [savedMessages, setSavedMessages] = useState<
     Record<string, ChatMessage[]>
   >({});
-  const [errorMessage, setErrorMessage] = useState("");
 
+  const [errorMessage, setErrorMessage] = useState("");
   const [inputMessage, setInputMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [isTyping, setIsTyping] = useState(false);
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesAreaRef = useRef<HTMLDivElement>(null);
+  const shouldAutoScrollRef = useRef(true);
+  const previousConversationRef = useRef(selectedConversationId);
 
   const selectedConversation = conversations.find(
     (conversation) => conversation.id === selectedConversationId
@@ -201,18 +203,27 @@ export default function ChatPage() {
 
   const selectedMessages = savedMessages[selectedConversationId] ?? [];
 
-  // Ambil ID pengunjung (disimpan di browser) + bersihkan data lama localStorage
+  const handleMessagesScroll = () => {
+    const element = messagesAreaRef.current;
+
+    if (!element) return;
+
+    const distanceFromBottom =
+      element.scrollHeight - element.scrollTop - element.clientHeight;
+
+    shouldAutoScrollRef.current = distanceFromBottom < 100;
+  };
+
   useEffect(() => {
     setVisitorId(getVisitorId());
 
     try {
       localStorage.removeItem("digeboy-store-chats-v1");
     } catch {
-      // abaikan
+      // Abaikan jika localStorage tidak tersedia.
     }
   }, []);
 
-  // Dengarkan pesan tiap toko dari Firestore secara realtime
   useEffect(() => {
     if (!visitorId) return;
 
@@ -221,6 +232,7 @@ export default function ChatPage() {
         getChatId(visitorId, conversation.id),
         (messages) => {
           setErrorMessage("");
+
           setSavedMessages((prev) => ({
             ...prev,
             [conversation.id]: messages,
@@ -238,20 +250,47 @@ export default function ChatPage() {
   }, [visitorId]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
+    const element = messagesAreaRef.current;
+
+    if (!element) return;
+
+    const conversationChanged =
+      previousConversationRef.current !== selectedConversationId;
+
+    if (conversationChanged) {
+      previousConversationRef.current = selectedConversationId;
+      shouldAutoScrollRef.current = true;
+    }
+
+    if (shouldAutoScrollRef.current) {
+      requestAnimationFrame(() => {
+        element.scrollTo({
+          top: element.scrollHeight,
+          behavior: "smooth",
+        });
+      });
+    }
   }, [selectedMessages.length, isTyping, selectedConversationId]);
 
-  const handleSendMessage = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSendMessage = async (
+    e: FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
 
     const userText = inputMessage.trim();
 
-    if (!userText || isTyping || !selectedConversation || !visitorId) return;
+    if (
+      !userText ||
+      isTyping ||
+      !selectedConversation ||
+      !visitorId
+    ) {
+      return;
+    }
 
     const conversation = selectedConversation;
     const chatId = getChatId(visitorId, conversation.id);
+
     const meta = {
       storeId: conversation.id,
       storeName: conversation.storeName,
@@ -260,12 +299,20 @@ export default function ChatPage() {
       productName: conversation.productName,
     };
 
+    shouldAutoScrollRef.current = true;
     setInputMessage("");
     setIsTyping(true);
     setErrorMessage("");
 
     try {
-      await sendMessage(chatId, visitorId, "user", userText, meta, visitorId);
+      await sendMessage(
+        chatId,
+        visitorId,
+        "user",
+        userText,
+        meta,
+        visitorId
+      );
     } catch {
       setInputMessage(userText);
       setIsTyping(false);
@@ -294,6 +341,7 @@ export default function ChatPage() {
   const handleSelectConversation = (id: string) => {
     if (isTyping) return;
 
+    shouldAutoScrollRef.current = true;
     setSelectedConversationId(id);
   };
 
@@ -321,11 +369,13 @@ export default function ChatPage() {
           <div className={styles.conversationList}>
             {filteredConversations.map((conversation) => {
               const saved = savedMessages[conversation.id] ?? [];
+
               const lastMessageText =
                 saved.length > 0
                   ? saved[saved.length - 1].text
-                  : conversation.messages[conversation.messages.length - 1]
-                      ?.text;
+                  : conversation.messages[
+                      conversation.messages.length - 1
+                    ]?.text;
 
               return (
                 <button
@@ -389,9 +439,15 @@ export default function ChatPage() {
             </span>
           </div>
 
-          <div className={styles.messagesArea}>
+          <div
+            ref={messagesAreaRef}
+            className={styles.messagesArea}
+            onScroll={handleMessagesScroll}
+          >
             {errorMessage && (
-              <div className={styles.errorBanner}>{errorMessage}</div>
+              <div className={styles.errorBanner}>
+                {errorMessage}
+              </div>
             )}
 
             <div className={styles.dateDivider}>
@@ -420,17 +476,21 @@ export default function ChatPage() {
 
             {selectedMessages.map((message, index) => {
               const previous = selectedMessages[index - 1];
+
               const showDivider =
                 !previous ||
                 previous.createdAt.toDateString() !==
                   message.createdAt.toDateString();
+
               const isUser = message.senderRole === "user";
 
               return (
                 <div key={message.id}>
                   {showDivider && (
                     <div className={styles.dateDivider}>
-                      <span>{formatDayLabel(message.createdAt)}</span>
+                      <span>
+                        {formatDayLabel(message.createdAt)}
+                      </span>
                     </div>
                   )}
 
@@ -443,7 +503,9 @@ export default function ChatPage() {
                   >
                     <div
                       className={
-                        isUser ? styles.userMessage : styles.adminMessage
+                        isUser
+                          ? styles.userMessage
+                          : styles.adminMessage
                       }
                     >
                       <p>{message.text}</p>
@@ -463,8 +525,6 @@ export default function ChatPage() {
                 </div>
               </div>
             )}
-
-            <div ref={messagesEndRef} />
           </div>
 
           <form
@@ -481,7 +541,9 @@ export default function ChatPage() {
 
             <button
               type="submit"
-              disabled={!inputMessage.trim() || isTyping || !visitorId}
+              disabled={
+                !inputMessage.trim() || isTyping || !visitorId
+              }
             >
               Send ➤
             </button>
