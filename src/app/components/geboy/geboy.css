@@ -1,0 +1,90 @@
+/* src/components/geboy/geboy.css  (all classes start with "gb-") */
+.gb-header { display:flex; align-items:center; gap:24px; padding:10px 28px; background:#62c283; color:#fff; }
+.gb-logo { display:flex; align-items:center; gap:8px; font-size:22px; font-weight:700; color:#fff; text-decoration:none; }
+.gb-logo-dot { width:30px; height:30px; border-radius:50%; background:#f3a6c0; border:3px solid #fff; }
+.gb-nav { display:flex; gap:6px; margin-left:12px; }
+.gb-nav-link { padding:8px 16px; border-radius:6px; color:#fff; text-decoration:none; font-weight:600; font-size:14px; }
+.gb-nav-link:hover { background:rgba(255,255,255,.15); }
+.gb-nav-link.is-active { background:rgba(255,255,255,.28); }
+.gb-header-right { margin-left:auto; display:flex; align-items:center; gap:14px; }
+.gb-coin-pill { display:flex; align-items:center; gap:6px; background:#fff; color:#2d6a43; padding:5px 12px 5px 6px; border-radius:999px; font-size:13px; font-weight:600; text-decoration:none; }
+.gb-coin { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:#1f6b3d; color:#f5c542; border:2px solid #f5c542; font-size:11px; font-weight:700; }
+.gb-user { color:#fff; font-weight:700; text-decoration:none; font-size:14px; }
+
+.gb-main { max-width:1000px; margin:0 auto; padding:28px 24px 60px; color:#222; font-family:system-ui, sans-serif; }
+.gb-title { font-size:26px; font-weight:700; margin:0 0 18px; }
+.gb-card { background:#fff; border:1px solid #e6e6e6; border-radius:8px; padding:24px; }
+.gb-muted { color:#777; font-size:13px; }
+.gb-error { background:#fdecec; color:#a12626; padding:10px 14px; border-radius:6px; margin-bottom:14px; font-size:14px; }
+.gb-ok { color:#2d8a50; font-size:14px; }
+
+.gb-btn { background:#62c283; color:#fff; border:0; border-radius:6px; padding:9px 22px; font-weight:600; cursor:pointer; font-size:14px; }
+.gb-btn:hover { background:#52b073; }
+.gb-btn:disabled { background:#b8dcc5; cursor:not-allowed; }
+.gb-btn-outline { background:#fff; color:#3a9d5d; border:1px solid #62c283; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:13px; text-decoration:none; display:inline-block; }
+.gb-btn-outline:hover { background:#eef9f2; }
+
+.gb-tabs { display:flex; gap:28px; border-bottom:1px solid #e6e6e6; margin-bottom:22px; background:#fff; padding:0 20px; }
+.gb-tab { padding:14px 0; font-size:14px; color:#555; background:none; border:0; border-bottom:2px solid transparent; cursor:pointer; text-decoration:none; }
+.gb-tab.is-active { color:#3a9d5d; border-bottom-color:#3a9d5d; font-weight:600; }
+.gb-tab.is-disabled { color:#aaa; cursor:not-allowed; }
+
+.gb-input { width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; background:#fff; }
+.gb-input:read-only { background:#f6f6f6; color:#666; }
+
+/* profile */
+.gb-profile { display:grid; grid-template-columns:220px 1fr; gap:30px; }
+.gb-avatar-col { display:flex; flex-direction:column; align-items:center; gap:12px; }
+.gb-avatar { width:130px; height:130px; border-radius:50%; background:#d9efe1; object-fit:cover; display:flex; align-items:center; justify-content:center; font-size:48px; color:#3a9d5d; font-weight:700; }
+.gb-form-row { display:grid; grid-template-columns:130px 1fr; align-items:center; gap:14px; margin-bottom:16px; font-size:14px; }
+.gb-radios { display:flex; gap:20px; }
+
+/* voucher */
+.gb-add-voucher { display:flex; align-items:center; gap:14px; margin-bottom:18px; }
+.gb-add-voucher .gb-input { flex:1; }
+.gb-filter { display:flex; gap:26px; border-bottom:1px solid #e6e6e6; margin-bottom:20px; }
+.gb-voucher-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:18px; }
+.gb-voucher { display:flex; background:#fff; border:1px solid #e6e6e6; border-radius:6px; overflow:hidden; }
+.gb-voucher-side { width:110px; display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff; font-size:13px; text-align:center; padding:6px; }
+.gb-voucher-body { flex:1; padding:14px; position:relative; }
+.gb-voucher-title { font-weight:700; margin-bottom:4px; }
+.gb-code { display:inline-block; border:1px solid #62c283; color:#3a9d5d; font-size:11px; padding:1px 8px; border-radius:3px; margin:6px 0; }
+.gb-voucher-actions { position:absolute; right:12px; top:12px; display:flex; flex-direction:column; gap:6px; align-items:flex-end; }
+.gb-link-red { background:none; border:0; color:#d33; font-size:12px; cursor:pointer; }
+
+/* coin */
+.gb-coin-hero { display:flex; align-items:center; justify-content:space-between; background:linear-gradient(135deg,#1f7a45,#0d4d27); color:#fff; border-radius:10px; padding:28px 36px; margin-bottom:18px; }
+.gb-coin-big { display:flex; align-items:center; gap:22px; }
+.gb-coin-big .gb-coin { width:78px; height:78px; font-size:34px; border-width:4px; }
+.gb-coin-amount { font-size:42px; font-weight:700; line-height:1; }
+.gb-coin-hero .gb-btn { background:#fff; color:#1f6b3d; padding:12px 24px; }
+.gb-coin-hero .gb-btn:disabled { background:#cfe8d8; color:#6a8f78; }
+.gb-coin-info { display:flex; gap:60px; background:#fff; border:1px solid #e6e6e6; border-radius:8px; padding:16px 22px; margin-bottom:18px; font-size:14px; }
+.gb-coin-info strong { color:#3a9d5d; display:block; margin-top:4px; }
+.gb-row { display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid #eee; }
+.gb-row:last-child { border-bottom:0; }
+.gb-plus { color:#2d8a50; font-weight:700; }
+
+@media (max-width:760px) {
+  .gb-header { flex-wrap:wrap; gap:10px; padding:10px 14px; }
+  .gb-profile { grid-template-columns:1fr; }
+  .gb-form-row { grid-template-columns:1fr; gap:6px; }
+  .gb-voucher-grid { grid-template-columns:1fr; }
+  .gb-coin-hero { flex-direction:column; gap:18px; align-items:flex-start; }
+  .gb-coin-info { gap:30px; }
+  .gb-tabs, .gb-filter { gap:16px; overflow-x:auto; }
+}
+
+/* homepage */
+.gb-home-hello { font-size:28px; font-weight:700; margin:0 0 6px; }
+.gb-home-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:18px; margin-top:22px; }
+.gb-home-card { display:flex; flex-direction:column; gap:8px; background:#fff; border:1px solid #e6e6e6; border-radius:10px; padding:22px; color:#222; text-decoration:none; }
+.gb-home-card:hover { border-color:#62c283; box-shadow:0 2px 10px rgba(98,194,131,.2); }
+.gb-home-card h2 { font-size:15px; font-weight:600; margin:0; color:#555; }
+.gb-home-big { font-size:34px; font-weight:700; color:#2d6a43; line-height:1.1; }
+.gb-home-link { margin-top:auto; padding-top:10px; color:#3a9d5d; font-weight:600; font-size:14px; }
+.gb-home-avatar { width:56px; height:56px; font-size:22px; }
+@media (max-width:760px) { .gb-home-grid { grid-template-columns:1fr; } }
+
+/* keeps the pages light even when the computer is in dark mode */
+.gb-shell { min-height:100vh; background:#f6f7f6; color:#222; color-scheme:light; }
