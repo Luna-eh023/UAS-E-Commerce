@@ -1,8 +1,8 @@
 
 .searchPage {
   min-height: 100vh;
-  background: white;
-  color: #222;
+  background: #ffffff;
+  color: #222222;
   padding-bottom: 80px;
 }
 
@@ -22,10 +22,11 @@
 .header h1 {
   font-size: 42px;
   margin: 15px 0;
+  color: #222222;
 }
 
 .header span {
-  color: #777;
+  color: #777777;
   font-size: 15px;
 }
 
@@ -42,28 +43,54 @@
   max-width: 750px;
   margin: auto;
   padding: 15px 20px;
-  border: 1px solid #ddd;
+  border: 1px solid #dddddd;
   border-radius: 8px;
+  background: #ffffff;
+  transition: 0.2s ease;
+}
+
+.searchBox:focus-within {
+  border-color: #60745c;
+  box-shadow: 0 0 0 3px rgba(96, 116, 92, 0.1);
 }
 
 .searchBox span {
   font-size: 25px;
-  color: #777;
+  color: #60745c;
 }
 
 .searchBox input {
   flex: 1;
+  min-width: 0;
   border: none;
   outline: none;
   font-size: 15px;
   background: transparent;
+  color: #222222 !important;
+  caret-color: #60745c;
+}
+
+.searchBox input::placeholder {
+  color: #999999 !important;
+  opacity: 1;
+}
+
+.searchBox input:focus {
+  color: #222222 !important;
 }
 
 .searchBox button {
   border: none;
   background: transparent;
-  color: #60745c;
+  color: #60745c !important;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
+  padding: 5px;
+}
+
+.searchBox button:hover {
+  color: #394b36 !important;
 }
 
 .categories {
@@ -75,18 +102,28 @@
 }
 
 .categories button {
+  min-width: 85px;
   padding: 10px 22px;
-  border: 1px solid #ddd;
+  border: 1px solid #dddddd;
   border-radius: 30px;
-  background: white;
+  background: #ffffff;
+  color: #444444 !important;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.categories button:hover,
-.categories .activeCategory {
-  background: #60745c;
-  color: white;
+.categories button:hover {
+  background: #edf3eb;
+  color: #394b36 !important;
   border-color: #60745c;
+}
+
+.categories .activeCategory {
+  background: #60745c !important;
+  color: #ffffff !important;
+  border-color: #60745c !important;
 }
 
 .resultHeader {
@@ -98,10 +135,11 @@
 
 .resultHeader h2 {
   font-size: 24px;
+  color: #222222;
 }
 
 .resultHeader p {
-  color: #888;
+  color: #888888;
   font-size: 14px;
 }
 
@@ -113,8 +151,9 @@
 
 .productCard {
   overflow: hidden;
-  border: 1px solid #eee;
+  border: 1px solid #eeeeee;
   border-radius: 10px;
+  background: #ffffff;
   transition: 0.3s;
 }
 
@@ -134,13 +173,14 @@
 }
 
 .productInfo span {
-  color: #888;
+  color: #888888;
   font-size: 12px;
 }
 
 .productInfo h3 {
   font-size: 17px;
   margin: 8px 0;
+  color: #222222;
 }
 
 .productInfo p {
@@ -153,18 +193,29 @@
   padding: 70px 20px;
 }
 
+.emptyState h3 {
+  color: #222222;
+}
+
 .emptyState p {
-  color: #888;
+  color: #888888;
   margin: 12px 0 20px;
 }
 
 .emptyState button {
   padding: 12px 22px;
   background: #60745c;
-  color: white;
+  color: #ffffff !important;
   border: none;
   border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.emptyState button:hover {
+  background: #455a42;
 }
 
 @media (max-width: 768px) {
@@ -186,5 +237,21 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 5px;
+  }
+
+  .searchContainer {
+    padding: 0 16px;
+  }
+
+  .searchBox {
+    padding: 12px 14px;
+  }
+
+  .categories {
+    gap: 8px;
+  }
+
+  .categories button {
+    padding: 9px 16px;
   }
 }
