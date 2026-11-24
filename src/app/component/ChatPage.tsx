@@ -34,7 +34,6 @@ export default function ChatPage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Mengambil chat yang tersimpan di browser
   useEffect(() => {
     const savedMessages = localStorage.getItem("digeboy-chat");
 
@@ -53,7 +52,6 @@ export default function ChatPage() {
     setChatLoaded(true);
   }, []);
 
-  // Menyimpan chat setiap ada pesan baru
   useEffect(() => {
     if (chatLoaded) {
       localStorage.setItem(
@@ -62,7 +60,6 @@ export default function ChatPage() {
       );
     }
 
-    // Scroll otomatis ke pesan terbaru
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
     });
@@ -80,7 +77,6 @@ export default function ChatPage() {
       minute: "2-digit",
     });
 
-    // Membuat pesan dari user
     const newMessage: Message = {
       id: Date.now(),
       text: userText,
@@ -92,7 +88,6 @@ export default function ChatPage() {
     setInputMessage("");
     setIsTyping(true);
 
-    // Menentukan balasan berdasarkan pesan user
     const text = userText.toLowerCase();
 
     let reply =
@@ -119,7 +114,6 @@ export default function ChatPage() {
       reply = "Sama-sama! Terima kasih sudah berbelanja di Digeboy.";
     }
 
-    // Simulasi balasan dari customer service
     window.setTimeout(() => {
       const adminMessage: Message = {
         id: Date.now() + 1,
@@ -139,7 +133,6 @@ export default function ChatPage() {
   return (
     <main className={styles.chatPage} id="chat">
 
-      {/* HEADER */}
       <header className={styles.topbar}>
         <Link href="/" className={styles.logo}>
           Digeboy<span>E-Commerce.</span>
@@ -150,10 +143,9 @@ export default function ChatPage() {
         </Link>
       </header>
 
-      {/* CHAT CONTAINER */}
+
       <section className={styles.chatLayout}>
 
-        {/* SIDEBAR */}
         <aside className={styles.sidebar}>
           <div className={styles.sidebarHeader}>
             <h2>Messages</h2>
@@ -186,7 +178,6 @@ export default function ChatPage() {
           </div>
         </aside>
 
-        {/* CHAT AREA */}
         <div className={styles.chatContent}>
 
           <div className={styles.chatHeader}>
@@ -204,7 +195,6 @@ export default function ChatPage() {
             </div>
           </div>
 
-          {/* MESSAGE AREA */}
           <div className={styles.messagesArea}>
             <div className={styles.dateDivider}>
               <span>Today</span>
@@ -245,7 +235,6 @@ export default function ChatPage() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* MESSAGE INPUT */}
           <form
             className={styles.messageForm}
             onSubmit={handleSendMessage}
@@ -269,7 +258,6 @@ export default function ChatPage() {
         </div>
       </section>
 
-      {/* FOOTER */}
       <footer className={styles.pageFooter}>
         © 2026 Digeboy. All Rights Reserved.
       </footer>
