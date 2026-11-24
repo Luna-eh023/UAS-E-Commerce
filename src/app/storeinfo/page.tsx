@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import "../../components/shop.css";
+import DigeboyHeader from "../../components/DigeboyHeader";
 import ProductCard from "../../components/ProductCard";
 import { fetchProductsOfStore, fetchStores } from "../../lib/catalog";
 import type { Product, Store } from "../../lib/products";
@@ -178,8 +179,11 @@ function StoreLoader() {
 
 export default function StoreInfoPage() {
   return (
-    <Suspense fallback={null}>
-      <StoreLoader />
-    </Suspense>
+    <>
+      <DigeboyHeader />
+      <Suspense fallback={null}>
+        <StoreLoader />
+      </Suspense>
+    </>
   );
 }

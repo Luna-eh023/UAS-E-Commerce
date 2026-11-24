@@ -10,6 +10,19 @@
   }
 }
 
+/* The theme toggle sets data-bs-theme on <html>; it wins over the system setting above */
+[data-bs-theme="dark"] {
+  --background: #121416;
+  --foreground: #ededed;
+  color-scheme: dark;
+}
+
+[data-bs-theme="light"] {
+  --background: #ffffff;
+  --foreground: #171717;
+  color-scheme: light;
+}
+
 html {
   height: 100%;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import DigeboyHeader from "../../components/DigeboyHeader";
 import PaymentPage, { type SavedCard } from "../../payment/PaymentPage";
 import { createOrder, type OrderItem } from "../../lib/orders";
 
@@ -30,26 +31,29 @@ export default function CheckoutPage() {
     }
   }, []);
 
-  if (!cart) return null;
-
   return (
-    <PaymentPage
-      storeName={cart.storeName}
-      items={cart.items}
-      savedCards={savedCards}
-      gateway={async (req) => {
-        // Fake payment for now. Replace with your real provider call later.
-        console.log("pay request:", { ...req, card: req.card ? "[hidden]" : undefined });
-        await new Promise((r) => setTimeout(r, 800));
-        return { id: "txn_" + Math.random().toString(36).slice(2, 10) };
-      }}
-      onSuccess={async ({ transactionId }) => {
-        await createOrder({
-          storeName: cart.storeName,
-          items: cart.items,
-          transactionId,
-        });
-      }}
-    />
+    <>
+      <DigeboyHeader />
+      {cart && (
+        <PaymentPage
+          storeName={cart.storeName}
+          items={cart.items}
+          savedCards={savedCards}
+          gateway={async (req) => {
+            // Fake payment for now. Replace with your real provider call later.
+            console.log("pay request:", { ...req, card: req.card ? "[hidden]" : undefined });
+            await new Promise((r) => setTimeout(r, 800));
+            return { id: "txn_" + Math.random().toString(36).slice(2, 10) };
+          }}
+          onSuccess={async ({ transactionId }) => {
+            await createOrder({
+              storeName: cart.storeName,
+              items: cart.items,
+              transactionId,
+            });
+          }}
+        />
+      )}
+    </>
   );
 }

@@ -1,0 +1,111 @@
+.dg-header {
+  --dg-bg: #ffffff;
+  --dg-text: #212529;
+  --dg-muted: #6c757d;
+  --dg-line: #dee2e6;
+  --dg-green: #03ac0e;
+
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  background: var(--dg-bg);
+  color: var(--dg-text);
+  border-bottom: 1px solid var(--dg-line);
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  transition: background-color 0.2s ease;
+}
+
+[data-bs-theme="dark"] .dg-header {
+  --dg-bg: #212529;
+  --dg-text: #dee2e6;
+  --dg-muted: #adb5bd;
+  --dg-line: #495057;
+}
+
+.dg-header__row {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 16px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dg-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.dg-logo-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--dg-green);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dg-logo-text {
+  color: var(--dg-green);
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.dg-header__right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  white-space: nowrap;
+}
+
+.dg-link {
+  color: var(--dg-text);
+  text-decoration: none;
+}
+.dg-link--muted {
+  color: var(--dg-muted);
+}
+.dg-link:hover {
+  color: var(--dg-green);
+}
+
+.dg-toggle {
+  padding: 4px 16px;
+  border: 1px solid var(--dg-muted);
+  border-radius: 50rem;
+  background: transparent;
+  color: var(--dg-muted);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.dg-toggle:hover {
+  background: var(--dg-muted);
+  color: var(--dg-bg);
+}
+
+@media (max-width: 575px) {
+  .dg-link {
+    display: none;
+  }
+}
+
+/* the page under the header fills the rest of the screen, not a full extra screen */
+.dg-header ~ .pp-page,
+.dg-header ~ .sh-page {
+  min-height: calc(100vh - 71px);
+}

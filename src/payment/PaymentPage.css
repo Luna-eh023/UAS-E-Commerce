@@ -5,17 +5,26 @@
   --green: #1fb85a;
   --panel: #f3f3f4;
   --err: #b3261e;
+  --ok: #17703a;
+  --page: #c8d8c9;
+  --shell: #fff;
+  --card: #fff;
+  --btn-bg: #000;
+  --btn-ink: #fff;
+  --visa: #1a3d9c;
+  --new-from: #e9e9ea;
+  --new-to: #dcdcde;
 
   min-height: 100vh;
   padding: 32px;
-  background: #c8d8c9;
+  background: var(--page);
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   color: var(--ink);
 }
 .pp-shell {
   max-width: 1240px;
   margin: 0 auto;
-  background: #fff;
+  background: var(--shell);
   border-radius: 24px;
   box-shadow: 0 20px 50px rgba(40, 70, 50, 0.18);
   overflow: hidden;
@@ -91,7 +100,7 @@
   align-items: center;
   justify-content: center;
   color: var(--ink);
-  background: linear-gradient(135deg, #e9e9ea, #dcdcde);
+  background: linear-gradient(135deg, var(--new-from), var(--new-to));
 }
 .pp-cc__top, .pp-cc__bottom { display: flex; justify-content: space-between; align-items: center; }
 .pp-cc__bottom { font-size: 0.85rem; letter-spacing: 0.03em; }
@@ -102,8 +111,8 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #000;
-  color: #fff;
+  background: var(--ink);
+  color: var(--shell);
 }
 .pp-check {
   position: absolute;
@@ -123,7 +132,7 @@
 .pp-mc { display: inline-flex; }
 .pp-mc i { width: 22px; height: 22px; border-radius: 50%; background: #eb001b; }
 .pp-mc i + i { margin-left: -9px; background: #f79e1b; opacity: 0.95; }
-.pp-visa { font-weight: 800; font-style: italic; font-size: 1.3rem; color: #1a3d9c; }
+.pp-visa { font-weight: 800; font-style: italic; font-size: 1.3rem; color: var(--visa); }
 .pp-cc .pp-visa { color: #fff; }
 .pp-amex {
   padding: 4px 6px;
@@ -165,7 +174,7 @@
 .pp-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
 .pp-option {
   padding: 16px;
-  background: #fff;
+  background: var(--card);
   border: 1px solid var(--line);
   border-radius: 12px;
   cursor: pointer;
@@ -192,14 +201,14 @@
   padding: 16px 40px;
   border: 0;
   border-radius: 10px;
-  background: #000;
-  color: #fff;
+  background: var(--btn-bg);
+  color: var(--btn-ink);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
   cursor: pointer;
 }
 .pp-pay:disabled { opacity: 0.6; cursor: not-allowed; }
 .pp-msg { margin: 0; font-size: 0.9rem; }
-.pp-msg--ok { color: #17703a; }
+.pp-msg--ok { color: var(--ok); }
 .pp-msg--err { color: var(--err); }
 
 /* summary */
@@ -218,7 +227,7 @@
   margin: 0 auto 18px;
   overflow: hidden;
   border-radius: 14px;
-  background: #fff;
+  background: var(--card);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
   font-size: 1.8rem;
   color: var(--muted);
@@ -243,6 +252,27 @@
   font-size: 0.85rem;
 }
 .pp-items li { display: flex; justify-content: space-between; gap: 12px; }
+
+/* dark mode (switched by the toggle in the header) */
+[data-bs-theme="dark"] .pp-page {
+  --ink: #e8eaed;
+  --muted: #9aa0ab;
+  --line: #3a3f47;
+  --panel: #23272d;
+  --err: #f2867f;
+  --ok: #5ad28a;
+  --page: #121416;
+  --shell: #1a1d20;
+  --card: #23272d;
+  --btn-bg: #e8eaed;
+  --btn-ink: #111418;
+  --visa: #7f9cff;
+  --new-from: #2d323a;
+  --new-to: #23272d;
+  color-scheme: dark;
+}
+[data-bs-theme="dark"] .pp-shell { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); }
+[data-bs-theme="dark"] .pp-thumb { box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); }
 
 @media (max-width: 900px) {
   .pp-page { padding: 12px; }

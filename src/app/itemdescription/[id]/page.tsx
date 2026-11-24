@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import "../../../components/shop.css";
+import DigeboyHeader from "../../../components/DigeboyHeader";
 import ProductImage from "../../../components/ProductImage";
 import ProductCard from "../../../components/ProductCard";
 import { addToCart } from "../../../lib/cart";
@@ -378,5 +379,10 @@ export default function ItemDescriptionPage() {
   const params = useParams();
   const id = String(params?.id ?? "");
   // key resets the page (loading, choices) when you open another product
-  return <ItemLoader key={id} id={id} />;
+  return (
+    <>
+      <DigeboyHeader />
+      <ItemLoader key={id} id={id} />
+    </>
+  );
 }
