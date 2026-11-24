@@ -2,7 +2,7 @@ import {
   collection, doc, setDoc, deleteDoc, onSnapshot, increment, serverTimestamp, writeBatch,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import type { Product } from "./products";
+import type { Product } from "./catalog";
 
 // Struktur data:
 //   users/{uid}/wishlist/{productId}  -> salinan data produk

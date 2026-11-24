@@ -119,3 +119,38 @@ body {
     border-left: 1px solid var(--line-color);
   }
 }
+
+/* Dashboard Digeboy */
+
+.product-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+}
+
+.product-image {
+  height: 180px;
+  padding: 16px;
+}
+
+@media (max-width: 576px) {
+  .product-image {
+    height: 140px;
+    padding: 10px;
+  }
+}
+
+/* Cart */
+
+.cart-summary {
+  top: 100px;
+}
+
+@media (max-width: 991px) {
+  .cart-summary {
+    position: static !important;
+  }
+}

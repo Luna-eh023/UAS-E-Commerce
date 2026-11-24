@@ -17,7 +17,7 @@ export default function LoginPage() {
 
   const run = async (fn: () => Promise<unknown>) => {
     setBusy(true); setError("");
-    try { await fn(); router.push("/products"); }
+    try { await fn(); router.push("/"); }
     catch (e) { setError(authError(e)); }
     finally { setBusy(false); }
   };

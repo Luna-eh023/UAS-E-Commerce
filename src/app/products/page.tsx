@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useWishlist } from "@/components/WishlistProvider";
 import styles from "./products.module.css";
-import { CATEGORIES, LOCATIONS, Product, getProducts, seedProducts } from "@/lib/products";
+import { CATEGORIES, LOCATIONS, Product, getProducts, seedProducts } from "@/lib/catalog";
 
 type Sort = "relevan" | "termurah" | "termahal" | "rating";
 

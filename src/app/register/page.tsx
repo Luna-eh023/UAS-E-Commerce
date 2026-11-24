@@ -20,14 +20,14 @@ export default function RegisterPage() {
     e.preventDefault();
     if (password !== repeat) { setError("Kata sandi dan pengulangannya tidak sama."); return; }
     setBusy(true); setError("");
-    try { await register(name.trim(), email, password); router.push("/products"); }
+    try { await register(name.trim(), email, password); router.push("/"); }
     catch (err) { setError(authError(err)); }
     finally { setBusy(false); }
   };
 
   const google = async () => {
     setBusy(true); setError("");
-    try { await loginWithGoogle(); router.push("/products"); }
+    try { await loginWithGoogle(); router.push("/"); }
     catch (err) { setError(authError(err)); }
     finally { setBusy(false); }
   };

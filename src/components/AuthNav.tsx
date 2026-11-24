@@ -23,7 +23,7 @@ export default function AuthNav() {
   return (
     <div className="d-flex align-items-center gap-2">
       <span className="d-none d-md-inline small">
-        Halo, <strong>{user.displayName || user.email}</strong>
+        <strong>{user.displayName || user.email}</strong>
       </span>
       <button
         className="btn btn-sm btn-outline-secondary"

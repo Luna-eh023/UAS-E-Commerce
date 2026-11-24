@@ -3,13 +3,12 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import Script from "next/script";
 import Link from "next/link";
-import WishlistProvider from "@/components/WishlistProvider";
-import WishlistNav from "@/components/WishlistNav";
 import ThemeToggle from "@/components/ThemeToggle";
 import FlashSalePopup from "@/components/FlashSalePopup";
-import "./globals.css";
-import AuthProvider from "@/components/AuthProvider";
 import AuthNav from "@/components/AuthNav";
+import WishlistNav from "@/components/WishlistNav";
+import Providers from "@/components/Providers";
+import "./globals.css";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -17,8 +16,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Digeboy",
-  description: "E-commerce Digeboy",
+  title: "Digeboy - E-Commerce",
+  description: "E-Commerce Digeboy",
 };
 
 const themeScript = `(function(){try{var t=localStorage.getItem("theme");if(!t){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.setAttribute("data-bs-theme",t)}catch(e){}})();`;
@@ -30,50 +29,40 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" data-bs-theme="light" suppressHydrationWarning>
-      <AuthProvider>
-        <WishlistProvider>
-          <body>
-            <Script
-              id="theme-init"
-              strategy="beforeInteractive"
-              dangerouslySetInnerHTML={{ __html: themeScript }}
-            />
-            <FlashSalePopup />
+      <body>
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: themeScript }}
+        />
 
-            <header className="bg-body border-bottom shadow-sm sticky-top">
-              <div className="container d-flex align-items-center justify-content-between py-3">
+        <Providers>
+          <header className="bg-body border-bottom shadow-sm sticky-top">
+            <div className="container d-flex align-items-center justify-content-between py-3 flex-wrap gap-2">
+              <Link href="/" className="d-flex align-items-center gap-2 text-decoration-none">
+                <span className={`logo-mark ${poppins.className}`}>d</span>
+                <span className={`logo-text ${poppins.className}`}>digeboy</span>
+              </Link>
 
-                <Link
-                  href="/products"
-                  className="d-flex align-items-center gap-2 text-decoration-none"
-                >
-                  <span className={`logo-mark ${poppins.className}`}>d</span>
-                  <span className={`logo-text ${poppins.className}`}>digeboy</span>
+              <div className="d-flex align-items-center gap-3 text-nowrap">
+                <Link href="/products" className="text-decoration-none text-body d-none d-sm-inline">
+                  Produk
                 </Link>
-
-                <div className="d-flex align-items-center gap-3">
-                  <Link
-                    href="/products"
-                    className="text-decoration-none text-body d-none d-sm-inline"
-                  >
-                    Produk
-                  </Link>
-                  <Link
-                    href="/orders"
-                    className="text-decoration-none text-muted d-none d-sm-inline"
-                  >
-                    Pesanan Saya
-                  </Link>
-                  <AuthNav />
-                  <ThemeToggle />
-                </div>
+                <Link href="/orders" className="text-decoration-none text-muted d-none d-sm-inline">
+                  Pesanan Saya
+                </Link>
+                <WishlistNav />
+                <AuthNav />
+                <ThemeToggle />
               </div>
-            </header>
+            </div>
+          </header>
 
-            {children}
-          </body>
-        </WishlistProvider>
-      </AuthProvider>
-    </html >
+          {children}
+        </Providers>
+
+        <FlashSalePopup />
+      </body>
+    </html>
   );
 }
