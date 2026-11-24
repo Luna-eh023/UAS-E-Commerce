@@ -12,40 +12,156 @@ interface Message {
   time: string;
 }
 
-export default function ChatPage() {
-  const [inputMessage, setInputMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      text: "Halo! Selamat datang di Digeboy E-commerce.",
-      sender: "admin",
-      time: "10:00",
-    },
-    {
-      id: 2,
-      text: "Ada yang bisa kami bantu hari ini?",
-      sender: "admin",
-      time: "10:00",
-    },
-  ]);
+interface Conversation {
+  id: number;
+  storeName: string;
+  initials: string;
+  productName: string;
+  status: string;
+  messages: Message[];
+}
 
+const initialConversations: Conversation[] = [
+  {
+    id: 1,
+    storeName: "TechStore Official",
+    initials: "TS",
+    productName: "Wireless Headphone",
+    status: "Pesanan sedang dikemas",
+    messages: [
+      {
+        id: 1,
+        text: "Halo! Terima kasih sudah berbelanja di TechStore Official.",
+        sender: "admin",
+        time: "09:00",
+      },
+      {
+        id: 2,
+        text: "Kami ingin menginformasikan bahwa pesanan Wireless Headphone kamu sudah kami terima.",
+        sender: "admin",
+        time: "09:01",
+      },
+      {
+        id: 3,
+        text: "Saat ini produk sedang dalam proses pengemasan. Kami akan segera mengirimkan pesanan kamu.",
+        sender: "admin",
+        time: "09:05",
+      },
+    ],
+  },
+  {
+    id: 2,
+    storeName: "Fashion House",
+    initials: "FH",
+    productName: "Premium Hoodie",
+    status: "Pesanan telah dikirim",
+    messages: [
+      {
+        id: 1,
+        text: "Halo! Terima kasih telah membeli Premium Hoodie di Fashion House.",
+        sender: "admin",
+        time: "09:10",
+      },
+      {
+        id: 2,
+        text: "Kabar baik! Pesanan kamu sudah berhasil kami serahkan kepada pihak ekspedisi.",
+        sender: "admin",
+        time: "09:12",
+      },
+      {
+        id: 3,
+        text: "Nomor resi pengiriman kamu adalah FSH20261124. Silakan gunakan nomor tersebut untuk melacak paket.",
+        sender: "admin",
+        time: "09:15",
+      },
+    ],
+  },
+  {
+    id: 3,
+    storeName: "Gadget Universe",
+    initials: "GU",
+    productName: "Smart Watch Series 8",
+    status: "Menunggu pembayaran",
+    messages: [
+      {
+        id: 1,
+        text: "Halo! Selamat datang di Gadget Universe.",
+        sender: "admin",
+        time: "09:20",
+      },
+      {
+        id: 2,
+        text: "Kami menerima pesanan Smart Watch Series 8 dari akun kamu.",
+        sender: "admin",
+        time: "09:21",
+      },
+      {
+        id: 3,
+        text: "Saat ini pesanan masih menunggu konfirmasi pembayaran. Silakan selesaikan pembayaran agar pesanan dapat kami proses.",
+        sender: "admin",
+        time: "09:25",
+      },
+    ],
+  },
+  {
+    id: 4,
+    storeName: "Home Living Store",
+    initials: "HL",
+    productName: "Minimalist Table Lamp",
+    status: "Pesanan selesai",
+    messages: [
+      {
+        id: 1,
+        text: "Halo! Terima kasih sudah berbelanja di Home Living Store.",
+        sender: "admin",
+        time: "09:30",
+      },
+      {
+        id: 2,
+        text: "Kami ingin menginformasikan bahwa Minimalist Table Lamp sudah berhasil dikirim dan diterima.",
+        sender: "admin",
+        time: "09:35",
+      },
+      {
+        id: 3,
+        text: "Semoga produk yang kamu terima sesuai harapan. Terima kasih telah berbelanja bersama kami!",
+        sender: "admin",
+        time: "09:40",
+      },
+    ],
+  },
+];
+
+export default function ChatPage() {
+  const [conversations, setConversations] = useState<Conversation[]>(
+    initialConversations
+  );
+
+  const [selectedConversationId, setSelectedConversationId] =
+    useState<number>(1);
+
+  const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [chatLoaded, setChatLoaded] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const selectedConversation = conversations.find(
+    (conversation) => conversation.id === selectedConversationId
+  );
+
   useEffect(() => {
-    const savedMessages = localStorage.getItem("digeboy-chat");
+    const savedChats = localStorage.getItem("digeboy-store-chats-v1");
 
-    if (savedMessages) {
+    if (savedChats) {
       try {
-        const parsedMessages: Message[] = JSON.parse(savedMessages);
+        const parsedChats: Conversation[] = JSON.parse(savedChats);
 
-        if (Array.isArray(parsedMessages)) {
-          setMessages(parsedMessages);
+        if (Array.isArray(parsedChats)) {
+          setConversations(parsedChats);
         }
       } catch {
-        localStorage.removeItem("digeboy-chat");
+        localStorage.removeItem("digeboy-store-chats-v1");
       }
     }
 
@@ -55,69 +171,53 @@ export default function ChatPage() {
   useEffect(() => {
     if (chatLoaded) {
       localStorage.setItem(
-        "digeboy-chat",
-        JSON.stringify(messages)
+        "digeboy-store-chats-v1",
+        JSON.stringify(conversations)
       );
     }
 
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
     });
-  }, [messages, chatLoaded]);
+  }, [conversations, chatLoaded, selectedConversationId]);
 
   const handleSendMessage = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const userText = inputMessage.trim();
 
-    if (!userText || isTyping) return;
+    if (!userText || isTyping || !selectedConversation) return;
 
     const now = new Date().toLocaleTimeString("id-ID", {
       hour: "2-digit",
       minute: "2-digit",
     });
 
-    const newMessage: Message = {
+    const userMessage: Message = {
       id: Date.now(),
       text: userText,
       sender: "user",
       time: now,
     };
 
-    setMessages((prev) => [...prev, newMessage]);
+    setConversations((prev) =>
+      prev.map((conversation) =>
+        conversation.id === selectedConversationId
+          ? {
+              ...conversation,
+              messages: [...conversation.messages, userMessage],
+            }
+          : conversation
+      )
+    );
+
     setInputMessage("");
     setIsTyping(true);
-
-    const text = userText.toLowerCase();
-
-    let reply =
-      "Terima kasih sudah menghubungi Digeboy E-commerce. Ada hal lain yang bisa kami bantu?";
-
-    if (text.includes("harga")) {
-      reply = "Untuk informasi harga, silakan cek katalog produk kami.";
-    } else if (
-      text.includes("pengiriman") ||
-      text.includes("lacak")
-    ) {
-      reply = "Untuk mengecek pengiriman, silakan buka menu Lacak Pesanan. Kamu bisa mencoba nomor DGB001.";
-    } else if (
-      text.includes("pesanan") ||
-      text.includes("order")
-    ) {
-      reply = "Silakan berikan nomor pesanan kamu agar bisa kami bantu cek.";
-    } else if (
-      text.includes("halo") ||
-      text.includes("hai")
-    ) {
-      reply = "Halo! Senang bisa membantu kamu. Ada yang ingin ditanyakan?";
-    } else if (text.includes("terima kasih")) {
-      reply = "Sama-sama! Terima kasih sudah berbelanja di Digeboy.";
-    }
 
     window.setTimeout(() => {
       const adminMessage: Message = {
         id: Date.now() + 1,
-        text: reply,
+        text: `Terima kasih sudah menghubungi ${selectedConversation.storeName}. Pesan kamu mengenai ${selectedConversation.productName} sudah kami terima. Tim toko kami akan segera membantu kamu.`,
         sender: "admin",
         time: new Date().toLocaleTimeString("id-ID", {
           hour: "2-digit",
@@ -125,14 +225,31 @@ export default function ChatPage() {
         }),
       };
 
-      setMessages((prev) => [...prev, adminMessage]);
+      setConversations((prev) =>
+        prev.map((conversation) =>
+          conversation.id === selectedConversationId
+            ? {
+                ...conversation,
+                messages: [...conversation.messages, adminMessage],
+              }
+            : conversation
+        )
+      );
+
       setIsTyping(false);
-    }, 800);
+    }, 1000);
   };
+
+  const handleSelectConversation = (id: number) => {
+    if (isTyping) return;
+
+    setSelectedConversationId(id);
+  };
+
+  if (!selectedConversation) return null;
 
   return (
     <main className={styles.chatPage} id="chat">
-
       <header className={styles.topbar}>
         <Link href="/" className={styles.logo}>
           Digeboy<span>E-Commerce.</span>
@@ -143,56 +260,86 @@ export default function ChatPage() {
         </Link>
       </header>
 
-
       <section className={styles.chatLayout}>
-
         <aside className={styles.sidebar}>
           <div className={styles.sidebarHeader}>
             <h2>Messages</h2>
-            <p>Your customer support conversations</p>
+            <p>Your store conversations</p>
           </div>
 
           <div className={styles.searchBox}>
             <input
               type="text"
-              placeholder="Search conversations..."
+              placeholder="Search stores..."
+              aria-label="Search stores"
               disabled
-              aria-label="Search conversations"
             />
           </div>
 
-          <div className={styles.conversation}>
-            <div className={styles.avatar}>
-              CS
-              <span className={styles.onlineIndicator}></span>
-            </div>
+          <div className={styles.conversationList}>
+            {conversations.map((conversation) => {
+              const lastMessage =
+                conversation.messages[conversation.messages.length - 1];
 
-            <div className={styles.conversationInfo}>
-              <h4>Customer Service</h4>
-              <p>
-                {messages[messages.length - 1]?.text}
-              </p>
-            </div>
+              return (
+                <div
+                  key={conversation.id}
+                  className={`${styles.conversation} ${
+                    selectedConversationId === conversation.id
+                      ? styles.conversationSelected
+                      : ""
+                  }`}
+                  onClick={() =>
+                    handleSelectConversation(conversation.id)
+                  }
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      handleSelectConversation(conversation.id);
+                    }
+                  }}
+                >
+                  <div className={styles.avatar}>
+                    {conversation.initials}
+                    <span className={styles.onlineIndicator}></span>
+                  </div>
 
-            <span className={styles.activeLabel}>Active</span>
+                  <div className={styles.conversationInfo}>
+                    <h4>{conversation.storeName}</h4>
+                    <p>{lastMessage?.text}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </aside>
 
         <div className={styles.chatContent}>
-
           <div className={styles.chatHeader}>
             <div className={styles.avatar}>
-              CS
+              {selectedConversation.initials}
               <span className={styles.onlineIndicator}></span>
             </div>
 
-            <div>
-              <h3>Customer Service</h3>
+            <div className={styles.chatHeaderInfo}>
+              <h3>{selectedConversation.storeName}</h3>
               <p>
                 <span className={styles.greenDot}></span>
-                Online - Ready to help
+                Official Store
               </p>
             </div>
+          </div>
+
+          <div className={styles.productInfo}>
+            <div>
+              <span>Purchased Product</span>
+              <h4>{selectedConversation.productName}</h4>
+            </div>
+
+            <span className={styles.orderStatus}>
+              {selectedConversation.status}
+            </span>
           </div>
 
           <div className={styles.messagesArea}>
@@ -200,7 +347,7 @@ export default function ChatPage() {
               <span>Today</span>
             </div>
 
-            {messages.map((message) => (
+            {selectedConversation.messages.map((message) => (
               <div
                 key={message.id}
                 className={
@@ -226,7 +373,7 @@ export default function ChatPage() {
               <div className={styles.adminMessageWrapper}>
                 <div className={styles.adminMessage}>
                   <p className={styles.typing}>
-                    Customer Service sedang mengetik...
+                    {selectedConversation.storeName} sedang mengetik...
                   </p>
                 </div>
               </div>
@@ -241,7 +388,7 @@ export default function ChatPage() {
           >
             <input
               type="text"
-              placeholder="Type your message here..."
+              placeholder={`Message ${selectedConversation.storeName}...`}
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               maxLength={500}
@@ -254,14 +401,12 @@ export default function ChatPage() {
               Send ➤
             </button>
           </form>
-
         </div>
       </section>
 
       <footer className={styles.pageFooter}>
         © 2026 Digeboy. All Rights Reserved.
       </footer>
-
     </main>
   );
 }
