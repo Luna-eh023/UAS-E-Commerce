@@ -1,51 +1,9 @@
 
 .page {
-  min-height: 100vh;
-  background: #f5f8f5;
-  color: #253348;
+  min-height: calc(100vh - 70px);
+  background: #f0f3f7;
+  color: #1b1b1f;
   font-family: Arial, Helvetica, sans-serif;
-}
-
-.navbar {
-  min-height: 75px;
-  padding: 15px 7%;
-  background: #ffffff;
-  border-bottom: 1px solid #e8edf3;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  box-sizing: border-box;
-}
-
-.logo {
-  color: #253348;
-  font-size: 23px;
-  font-weight: 800;
-  text-decoration: none;
-}
-
-.logo span {
-  color: #397A43;
-  font-size: 14px;
-}
-
-.navbar nav {
-  display: flex;
-  gap: 25px;
-  flex-wrap: wrap;
-}
-
-.navbar nav a {
-  color: #555555;
-  font-size: 14px;
-  text-decoration: none;
-  transition: 0.2s;
-}
-
-.navbar nav a:hover,
-.navbar nav .activeLink {
-  color: #397A43;
 }
 
 .header {
@@ -54,7 +12,7 @@
 }
 
 .subtitle {
-  color: #397A43;
+  color: #03ac0e;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 2px;
@@ -88,7 +46,7 @@
 .orderSummary > div {
   padding: 20px 23px;
   background: #ffffff;
-  border: 1px solid #e8edf3;
+  border: 1px solid #e9ecef;
   border-radius: 12px;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.025);
 }
@@ -100,7 +58,7 @@
 
 .orderSummary h2 {
   margin-top: 9px;
-  color: #397A43;
+  color: #03ac0e;
   font-size: 25px;
 }
 
@@ -133,13 +91,13 @@
 }
 
 .filters button:hover {
-  border-color: #397A43;
-  color: #397A43;
+  border-color: #03ac0e;
+  color: #03ac0e;
 }
 
 .filters .activeFilter {
-  background: #397A43;
-  border-color: #397A43;
+  background: #03ac0e;
+  border-color: #03ac0e;
   color: #ffffff;
 }
 
@@ -152,7 +110,7 @@
 .orderCard {
   overflow: hidden;
   background: #ffffff;
-  border: 1px solid #e7ece7;
+  border: 1px solid #e9ecef;
   border-radius: 13px;
   box-shadow: 0 4px 15px rgba(30, 60, 30, 0.035);
   transition: 0.2s;
@@ -185,8 +143,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 9px;
-  background: #eaf5ec;
-  color: #397A43;
+  background: #e5f7e6;
+  color: #03ac0e;
 }
 
 .storeInfo h3 {
@@ -225,8 +183,8 @@
 }
 
 .completed {
-  background: #e5f5e8;
-  color: #397A43;
+  background: #e5f7e6;
+  color: #028a0b;
 }
 
 .productSection {
@@ -260,7 +218,7 @@
 .category {
   display: inline-block;
   margin-bottom: 7px;
-  color: #397A43;
+  color: #03ac0e;
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -329,7 +287,7 @@
 }
 
 .deliveryInfo .totalPrice strong {
-  color: #397A43;
+  color: #03ac0e;
   font-size: 15px;
 }
 
@@ -344,10 +302,10 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  border: 1px solid #397A43;
+  border: 1px solid #03ac0e;
   border-radius: 7px;
   background: #ffffff;
-  color: #397A43;
+  color: #03ac0e;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -355,7 +313,7 @@
 }
 
 .detailButton:hover {
-  background: #397A43;
+  background: #03ac0e;
   color: #ffffff;
 }
 
@@ -409,7 +367,7 @@
 }
 
 .doneDot {
-  background: #397A43;
+  background: #03ac0e;
   color: #ffffff;
 }
 
@@ -445,7 +403,7 @@
   padding: 55px 20px;
   text-align: center;
   background: #ffffff;
-  border: 1px solid #e8edf3;
+  border: 1px solid #e9ecef;
   border-radius: 12px;
 }
 
@@ -464,18 +422,22 @@
   padding: 11px 18px;
   border: none;
   border-radius: 7px;
-  background: #397A43;
+  background: #03ac0e;
   color: #ffffff;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
 }
 
+.emptyState button:hover {
+  background: #028a0b;
+}
+
 .footer {
   text-align: center;
   padding: 22px;
   background: #ffffff;
-  border-top: 1px solid #e8edf3;
+  border-top: 1px solid #e9ecef;
   color: #999999;
   font-size: 12px;
 }
@@ -505,24 +467,6 @@
 }
 
 @media (max-width: 600px) {
-  .navbar {
-    align-items: flex-start;
-    flex-direction: column;
-    padding: 16px 5%;
-  }
-
-  .navbar nav {
-    gap: 15px;
-  }
-
-  .navbar nav a {
-    font-size: 12px;
-  }
-
-  .logo {
-    font-size: 20px;
-  }
-
   .header {
     padding: 40px 15px 25px;
   }

@@ -195,20 +195,6 @@ export default function LacakPage() {
 
   return (
     <main className={styles.page}>
-      <header className={styles.navbar}>
-        <a href="/" className={styles.logo}>
-          Digeboy<span>E-Commerce.</span>
-        </a>
-
-        <nav>
-          <a href="/">Search Produk</a>
-          <a href="/lacak" className={styles.activeLink}>
-            Lacak Pesanan
-          </a>
-          <a href="/#chat">Chat</a>
-        </nav>
-      </header>
-
       <section className={styles.header}>
         <p className={styles.subtitle}>DIGEBOY E-COMMERCE</p>
         <h1>Pesanan Saya</h1>
@@ -225,20 +211,24 @@ export default function LacakPage() {
           <div>
             <span>Dalam Pengiriman</span>
             <h2>
-              {orders.filter(
-                (order) => order.status === "Dalam perjalanan"
-              ).length}
+              {
+                orders.filter(
+                  (order) => order.status === "Dalam perjalanan"
+                ).length
+              }
             </h2>
           </div>
 
           <div>
             <span>Sedang Diproses</span>
             <h2>
-              {orders.filter(
-                (order) =>
-                  order.status === "Sedang dikemas" ||
-                  order.status === "Pesanan dibuat"
-              ).length}
+              {
+                orders.filter(
+                  (order) =>
+                    order.status === "Sedang dikemas" ||
+                    order.status === "Pesanan dibuat"
+                ).length
+              }
             </h2>
           </div>
         </div>
@@ -265,7 +255,10 @@ export default function LacakPage() {
         <div className={styles.orderList}>
           {filteredOrders.length > 0 ? (
             filteredOrders.map((order) => (
-              <article className={styles.orderCard} key={order.orderNumber}>
+              <article
+                className={styles.orderCard}
+                key={order.orderNumber}
+              >
                 <div className={styles.orderCardHeader}>
                   <div className={styles.storeInfo}>
                     <span className={styles.storeIcon}>
@@ -338,7 +331,9 @@ export default function LacakPage() {
 
                   <div className={styles.totalPrice}>
                     <span>Total Pembayaran</span>
-                    <strong>{formatPrice(order.price * order.quantity)}</strong>
+                    <strong>
+                      {formatPrice(order.price * order.quantity)}
+                    </strong>
                   </div>
                 </div>
 

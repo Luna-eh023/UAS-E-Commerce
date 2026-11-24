@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useEffect, useRef, FormEvent } from "react";
-import Link from "next/link";
 import styles from "./ChatPage.module.css";
 
 interface Message {
@@ -133,14 +132,14 @@ const initialConversations: Conversation[] = [
 ];
 
 export default function ChatPage() {
-  const [conversations, setConversations] = useState<Conversation[]>(
-    initialConversations
-  );
+  const [conversations, setConversations] =
+    useState<Conversation[]>(initialConversations);
 
   const [selectedConversationId, setSelectedConversationId] =
     useState<number>(1);
 
   const [inputMessage, setInputMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [chatLoaded, setChatLoaded] = useState(false);
 
@@ -148,6 +147,12 @@ export default function ChatPage() {
 
   const selectedConversation = conversations.find(
     (conversation) => conversation.id === selectedConversationId
+  );
+
+  const filteredConversations = conversations.filter((conversation) =>
+    conversation.storeName
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
   );
 
   useEffect(() => {
@@ -188,6 +193,10 @@ export default function ChatPage() {
 
     if (!userText || isTyping || !selectedConversation) return;
 
+    const currentConversationId = selectedConversationId;
+    const currentStoreName = selectedConversation.storeName;
+    const currentProductName = selectedConversation.productName;
+
     const now = new Date().toLocaleTimeString("id-ID", {
       hour: "2-digit",
       minute: "2-digit",
@@ -202,7 +211,7 @@ export default function ChatPage() {
 
     setConversations((prev) =>
       prev.map((conversation) =>
-        conversation.id === selectedConversationId
+        conversation.id === currentConversationId
           ? {
               ...conversation,
               messages: [...conversation.messages, userMessage],
@@ -217,7 +226,7 @@ export default function ChatPage() {
     window.setTimeout(() => {
       const adminMessage: Message = {
         id: Date.now() + 1,
-        text: `Terima kasih sudah menghubungi ${selectedConversation.storeName}. Pesan kamu mengenai ${selectedConversation.productName} sudah kami terima. Tim toko kami akan segera membantu kamu.`,
+        text: `Terima kasih sudah menghubungi ${currentStoreName}. Pesan kamu mengenai ${currentProductName} sudah kami terima. Tim toko kami akan segera membantu kamu.`,
         sender: "admin",
         time: new Date().toLocaleTimeString("id-ID", {
           hour: "2-digit",
@@ -227,7 +236,7 @@ export default function ChatPage() {
 
       setConversations((prev) =>
         prev.map((conversation) =>
-          conversation.id === selectedConversationId
+          conversation.id === currentConversationId
             ? {
                 ...conversation,
                 messages: [...conversation.messages, adminMessage],
@@ -250,16 +259,6 @@ export default function ChatPage() {
 
   return (
     <main className={styles.chatPage} id="chat">
-      <header className={styles.topbar}>
-        <Link href="/" className={styles.logo}>
-          Digeboy<span>E-Commerce.</span>
-        </Link>
-
-        <Link href="/" className={styles.backButton}>
-          ← Back to Shop
-        </Link>
-      </header>
-
       <section className={styles.chatLayout}>
         <aside className={styles.sidebar}>
           <div className={styles.sidebarHeader}>
@@ -272,17 +271,19 @@ export default function ChatPage() {
               type="text"
               placeholder="Search stores..."
               aria-label="Search stores"
-              disabled
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
           <div className={styles.conversationList}>
-            {conversations.map((conversation) => {
+            {filteredConversations.map((conversation) => {
               const lastMessage =
                 conversation.messages[conversation.messages.length - 1];
 
               return (
-                <div
+                <button
+                  type="button"
                   key={conversation.id}
                   className={`${styles.conversation} ${
                     selectedConversationId === conversation.id
@@ -292,13 +293,7 @@ export default function ChatPage() {
                   onClick={() =>
                     handleSelectConversation(conversation.id)
                   }
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      handleSelectConversation(conversation.id);
-                    }
-                  }}
+                  disabled={isTyping}
                 >
                   <div className={styles.avatar}>
                     {conversation.initials}
@@ -309,9 +304,15 @@ export default function ChatPage() {
                     <h4>{conversation.storeName}</h4>
                     <p>{lastMessage?.text}</p>
                   </div>
-                </div>
+                </button>
               );
             })}
+
+            {filteredConversations.length === 0 && (
+              <div className={styles.noConversation}>
+                <p>No stores found.</p>
+              </div>
+            )}
           </div>
         </aside>
 
