@@ -1,8 +1,7 @@
-
 .searchPage {
   min-height: 100vh;
-  background: #ffffff;
-  color: #222222;
+  background: white;
+  color: #222;
   padding-bottom: 80px;
 }
 
@@ -22,11 +21,10 @@
 .header h1 {
   font-size: 42px;
   margin: 15px 0;
-  color: #222222;
 }
 
 .header span {
-  color: #777777;
+  color: #777;
   font-size: 15px;
 }
 
@@ -43,20 +41,13 @@
   max-width: 750px;
   margin: auto;
   padding: 15px 20px;
-  border: 1px solid #dddddd;
+  border: 1px solid #ddd;
   border-radius: 8px;
-  background: #ffffff;
-  transition: 0.2s ease;
-}
-
-.searchBox:focus-within {
-  border-color: #60745c;
-  box-shadow: 0 0 0 3px rgba(96, 116, 92, 0.1);
 }
 
 .searchBox span {
   font-size: 25px;
-  color: #60745c;
+  color: #777;
 }
 
 .searchBox input {
@@ -66,31 +57,19 @@
   outline: none;
   font-size: 15px;
   background: transparent;
-  color: #222222 !important;
-  caret-color: #60745c;
+  color: #222;
+  caret-color: #222;
 }
 
 .searchBox input::placeholder {
-  color: #999999 !important;
-  opacity: 1;
-}
-
-.searchBox input:focus {
-  color: #222222 !important;
+  color: #999;
 }
 
 .searchBox button {
   border: none;
   background: transparent;
-  color: #60745c !important;
-  font-size: 13px;
-  font-weight: 600;
+  color: #60745c;
   cursor: pointer;
-  padding: 5px;
-}
-
-.searchBox button:hover {
-  color: #394b36 !important;
 }
 
 .categories {
@@ -102,28 +81,20 @@
 }
 
 .categories button {
-  min-width: 85px;
   padding: 10px 22px;
-  border: 1px solid #dddddd;
+  border: 1px solid #ddd;
   border-radius: 30px;
-  background: #ffffff;
-  color: #444444 !important;
-  font-size: 13px;
-  font-weight: 600;
+  background: white;
+  color: #333;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: 0.2s;
 }
 
-.categories button:hover {
-  background: #edf3eb;
-  color: #394b36 !important;
-  border-color: #60745c;
-}
-
+.categories button:hover,
 .categories .activeCategory {
-  background: #60745c !important;
-  color: #ffffff !important;
-  border-color: #60745c !important;
+  background: #60745c;
+  color: white;
+  border-color: #60745c;
 }
 
 .resultHeader {
@@ -135,11 +106,10 @@
 
 .resultHeader h2 {
   font-size: 24px;
-  color: #222222;
 }
 
 .resultHeader p {
-  color: #888888;
+  color: #888;
   font-size: 14px;
 }
 
@@ -151,9 +121,9 @@
 
 .productCard {
   overflow: hidden;
-  border: 1px solid #eeeeee;
+  border: 1px solid #eee;
   border-radius: 10px;
-  background: #ffffff;
+  background: white;
   transition: 0.3s;
 }
 
@@ -162,30 +132,47 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
-.productCard img {
+.productImage {
+  display: block;
   width: 100%;
   height: 250px;
-  object-fit: cover;
+  object-fit: contain;
+  background: #f7f8f5;
 }
 
 .productInfo {
   padding: 18px;
 }
 
-.productInfo span {
-  color: #888888;
+.productCategory {
+  color: #888;
   font-size: 12px;
 }
 
 .productInfo h3 {
   font-size: 17px;
   margin: 8px 0;
-  color: #222222;
+  color: #222;
 }
 
-.productInfo p {
-  font-weight: bold;
-  color: #60745c;
+.sellerInfo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.sellerInfo span {
+  color: #666;
+  font-size: 13px;
+}
+
+.sellerAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #e5e5e5;
 }
 
 .emptyState {
@@ -193,29 +180,18 @@
   padding: 70px 20px;
 }
 
-.emptyState h3 {
-  color: #222222;
-}
-
 .emptyState p {
-  color: #888888;
+  color: #888;
   margin: 12px 0 20px;
 }
 
 .emptyState button {
   padding: 12px 22px;
   background: #60745c;
-  color: #ffffff !important;
+  color: white;
   border: none;
   border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
   cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.emptyState button:hover {
-  background: #455a42;
 }
 
 @media (max-width: 768px) {
@@ -237,21 +213,5 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 5px;
-  }
-
-  .searchContainer {
-    padding: 0 16px;
-  }
-
-  .searchBox {
-    padding: 12px 14px;
-  }
-
-  .categories {
-    gap: 8px;
-  }
-
-  .categories button {
-    padding: 9px 16px;
   }
 }

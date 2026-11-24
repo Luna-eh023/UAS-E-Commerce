@@ -1,66 +1,85 @@
-
 "use client";
 
 import { useState } from "react";
 import styles from "./SearchPage.module.css";
 
-const products = [
+type Product = {
+  id: number;
+  name: string;
+  category: string;
+  image: string;
+  sellerName: string;
+  sellerImage: string;
+};
+
+const products: Product[] = [
   {
     id: 1,
-    name: "Classic Sneakers",
-    category: "Shoes",
-    price: 459000,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600",
+    name: "Powerbank 10.000 mAh",
+    category: "Elektronik",
+    image: "/images/powerbank10000mah.webp",
+    sellerName: "Seller 1",
+    sellerImage: "/images/pppenjual1.jpg",
   },
   {
     id: 2,
-    name: "Minimalist Watch",
-    category: "Accessories",
-    price: 329000,
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600",
+    name: "Mouse Wireless Logitech",
+    category: "Aksesoris",
+    image: "/images/mousewireless.webp",
+    sellerName: "Seller 3",
+    sellerImage: "/images/pppenjual3.jpg",
   },
   {
     id: 3,
-    name: "Everyday Backpack",
-    category: "Bags",
-    price: 275000,
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600",
+    name: "Keyboard Mekanik",
+    category: "Aksesoris",
+    image: "/images/keyboardmekanik.jpg",
+    sellerName: "Seller 4",
+    sellerImage: "/images/pppenjual4.jpg",
   },
   {
     id: 4,
-    name: "Casual Shoes",
-    category: "Shoes",
-    price: 399000,
-    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=600",
+    name: "Kabel USB",
+    category: "Aksesoris",
+    image: "/images/kabelusb.jpg",
+    sellerName: "Seller 5",
+    sellerImage: "/images/pppenjual5.jpg",
   },
   {
     id: 5,
-    name: "Classic Handbag",
-    category: "Bags",
-    price: 350000,
-    image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600",
+    name: "Casing HP Transparan",
+    category: "Aksesoris",
+    image: "/images/casinghp.jpg",
+    sellerName: "Seller 6",
+    sellerImage: "/images/pppenjual6.jpg",
   },
   {
     id: 6,
-    name: "Fashion Sunglasses",
-    category: "Accessories",
-    price: 189000,
-    image: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=600",
+    name: "TWS Wireless Earbuds",
+    category: "Elektronik",
+    image: "/images/tws.jpg",
+    sellerName: "Seller 7",
+    sellerImage: "/images/pppenjual7.jpg",
   },
 ];
 
-const categories = ["All", "Shoes", "Bags", "Accessories"];
+const categories = ["All", "Elektronik", "Aksesoris"];
 
 export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  // Memfilter produk berdasarkan nama dan kategori
   const filteredProducts = products.filter((product) => {
     const keyword = searchTerm.toLowerCase();
 
-    const nameMatch = product.name.toLowerCase().includes(keyword);
-    const categoryMatch = product.category.toLowerCase().includes(keyword);
+    const nameMatch =
+      product.name.toLowerCase().includes(keyword) ||
+      product.sellerName.toLowerCase().includes(keyword);
+
+    const categoryMatch = product.category
+      .toLowerCase()
+      .includes(keyword);
+
     const filterMatch =
       selectedCategory === "All" ||
       product.category === selectedCategory;
@@ -82,7 +101,7 @@ export default function SearchPage() {
 
           <input
             type="text"
-            placeholder="Search for products..."
+            placeholder="Search for products or sellers..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -118,13 +137,32 @@ export default function SearchPage() {
         {filteredProducts.length > 0 ? (
           <div className={styles.productGrid}>
             {filteredProducts.map((product) => (
-              <div className={styles.productCard} key={product.id}>
-                <img src={product.image} alt={product.name} />
+              <div
+                className={styles.productCard}
+                key={product.id}
+              >
+                <img
+                  className={styles.productImage}
+                  src={product.image}
+                  alt={product.name}
+                />
 
                 <div className={styles.productInfo}>
-                  <span>{product.category}</span>
+                  <span className={styles.productCategory}>
+                    {product.category}
+                  </span>
+
                   <h3>{product.name}</h3>
-                  <p>Rp{product.price.toLocaleString("id-ID")}</p>
+
+                  <div className={styles.sellerInfo}>
+                    <img
+                      className={styles.sellerAvatar}
+                      src={product.sellerImage}
+                      alt={`Foto profil ${product.sellerName}`}
+                    />
+
+                    <span>{product.sellerName}</span>
+                  </div>
                 </div>
               </div>
             ))}
