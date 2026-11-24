@@ -1,0 +1,16 @@
+/* src/app/components/geboy/SiteHeader.css  (classes start with "dgh-") */
+.dgh-header { position:sticky; top:0; z-index:100; background:#fff; border-bottom:1px solid #dee2e6; box-shadow:0 1px 2px rgba(0,0,0,.075); }
+.dgh-inner { max-width:1140px; margin:0 auto; padding:16px 12px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+.dgh-brand { display:flex; align-items:center; gap:8px; text-decoration:none; }
+.dgh-mark { width:38px; height:38px; border-radius:11px; background:#03ac0e; color:#fff; font-size:1.5rem; font-weight:800; line-height:1; display:inline-flex; align-items:center; justify-content:center; }
+.dgh-text { color:#03ac0e; font-size:1.8rem; font-weight:800; letter-spacing:-0.04em; line-height:1; }
+.dgh-right { display:flex; align-items:center; gap:16px; white-space:nowrap; }
+.dgh-link { color:#212529; text-decoration:none; }
+.dgh-link:hover { color:#03ac0e; }
+.dgh-muted { color:#6c757d; }
+.dgh-icon { color:#212529; text-decoration:none; font-size:1.25rem; line-height:1; }
+.dgh-user { font-size:.875rem; color:#212529; }
+.dgh-btn { color:#03ac0e; border:1px solid #03ac0e; border-radius:.25rem; padding:.25rem .5rem; font-size:.875rem; font-weight:600; text-decoration:none; }
+.dgh-btn:hover { background:#03ac0e; color:#fff; }
+@media (max-width:575px) { .dgh-hide-sm { display:none; } }
+@media (max-width:767px) { .dgh-user { display:none; } }
