@@ -1,73 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./SearchPage.module.css";
-
-type Product = {
-  id: number;
-  name: string;
-  category: string;
-  image: string;
-  sellerName: string;
-  sellerImage: string;
-};
-
-const products: Product[] = [
-  {
-    id: 1,
-    name: "Powerbank 10.000 mAh",
-    category: "Elektronik",
-    image: "/images/powerbank10000mah.webp",
-    sellerName: "Seller 1",
-    sellerImage: "/images/pppenjual1.jpg",
-  },
-  {
-    id: 2,
-    name: "Mouse Wireless Logitech",
-    category: "Aksesoris",
-    image: "/images/mousewireless.webp",
-    sellerName: "Seller 3",
-    sellerImage: "/images/pppenjual3.jpg",
-  },
-  {
-    id: 3,
-    name: "Keyboard Mekanik",
-    category: "Aksesoris",
-    image: "/images/keyboardmekanik.jpg",
-    sellerName: "Seller 4",
-    sellerImage: "/images/pppenjual4.jpg",
-  },
-  {
-    id: 4,
-    name: "Kabel USB",
-    category: "Aksesoris",
-    image: "/images/kabelusb.jpg",
-    sellerName: "Seller 5",
-    sellerImage: "/images/pppenjual5.jpg",
-  },
-  {
-    id: 5,
-    name: "Casing HP Transparan",
-    category: "Aksesoris",
-    image: "/images/casinghp.jpg",
-    sellerName: "Seller 6",
-    sellerImage: "/images/pppenjual6.jpg",
-  },
-  {
-    id: 6,
-    name: "TWS Wireless Earbuds",
-    category: "Elektronik",
-    image: "/images/tws.jpg",
-    sellerName: "Seller 7",
-    sellerImage: "/images/pppenjual7.jpg",
-  },
-];
-
-const categories = ["All", "Elektronik", "Aksesoris"];
+import {
+  PRODUCT_RETENTION_DAYS,
+  seedSearchProductsIfMissing,
+  subscribeToProducts,
+  type ProductRecord,
+} from "../../lib/productService";
 
 export default function SearchPage() {
+  const [products, setProducts] = useState<ProductRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const seededRef = useRef(false);
+
+  // Produk dibaca realtime dari Firestore
+  useEffect(() => {
+    const unsubscribe = subscribeToProducts(
+      (data) => {
+        setProducts(data);
+        setLoading(false);
+        setErrorMessage("");
+
+        // Simpan produk bawaan yang belum ada (sekali per kunjungan halaman)
+        if (!seededRef.current) {
+          seededRef.current = true;
+          seedSearchProductsIfMissing(
+            new Set(data.map((product) => product.id))
+          ).catch(() => {
+            setErrorMessage(
+              "Gagal menyimpan produk ke database. Periksa Firestore Rules."
+            );
+          });
+        }
+      },
+      () => {
+        setLoading(false);
+        setErrorMessage(
+          "Gagal terhubung ke database produk. Periksa koneksi internet dan Firestore Rules."
+        );
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
+  const categories = [
+    "All",
+    ...Array.from(new Set(products.map((product) => product.category))).sort(),
+  ];
 
   const filteredProducts = products.filter((product) => {
     const keyword = searchTerm.toLowerCase();
@@ -76,13 +60,10 @@ export default function SearchPage() {
       product.name.toLowerCase().includes(keyword) ||
       product.sellerName.toLowerCase().includes(keyword);
 
-    const categoryMatch = product.category
-      .toLowerCase()
-      .includes(keyword);
+    const categoryMatch = product.category.toLowerCase().includes(keyword);
 
     const filterMatch =
-      selectedCategory === "All" ||
-      product.category === selectedCategory;
+      selectedCategory === "All" || product.category === selectedCategory;
 
     return (nameMatch || categoryMatch) && filterMatch;
   });
@@ -113,6 +94,10 @@ export default function SearchPage() {
           )}
         </div>
 
+        {errorMessage && (
+          <div className={styles.errorBanner}>{errorMessage}</div>
+        )}
+
         <div className={styles.categories}>
           {categories.map((category) => (
             <button
@@ -131,21 +116,36 @@ export default function SearchPage() {
 
         <div className={styles.resultHeader}>
           <h2>Products</h2>
-          <p>{filteredProducts.length} products found</p>
+          <p>
+            {loading
+              ? "Loading..."
+              : `${filteredProducts.length} products found`}
+          </p>
         </div>
 
-        {filteredProducts.length > 0 ? (
+        <p className={styles.retentionNote}>
+          Produk dari halaman ini disimpan {PRODUCT_RETENTION_DAYS} hari,
+          setelah itu terhapus otomatis.
+        </p>
+
+        {loading ? null : filteredProducts.length > 0 ? (
           <div className={styles.productGrid}>
             {filteredProducts.map((product) => (
               <div
                 className={styles.productCard}
                 key={product.id}
               >
-                <img
-                  className={styles.productImage}
-                  src={product.image}
-                  alt={product.name}
-                />
+                {product.image ? (
+                  <img
+                    className={styles.productImage}
+                    src={product.image}
+                    alt={product.name}
+                  />
+                ) : (
+                  <div className={styles.productEmoji}>
+                    {product.emoji || "🛍️"}
+                  </div>
+                )}
 
                 <div className={styles.productInfo}>
                   <span className={styles.productCategory}>
@@ -154,15 +154,40 @@ export default function SearchPage() {
 
                   <h3>{product.name}</h3>
 
-                  <div className={styles.sellerInfo}>
-                    <img
-                      className={styles.sellerAvatar}
-                      src={product.sellerImage}
-                      alt={`Foto profil ${product.sellerName}`}
-                    />
+                  {product.price !== null && (
+                    <p className={styles.productPrice}>
+                      Rp{product.price.toLocaleString("id-ID")}
+                    </p>
+                  )}
 
-                    <span>{product.sellerName}</span>
-                  </div>
+                  {(product.rating !== null || product.sold !== null) && (
+                    <p className={styles.productMeta}>
+                      {product.rating !== null && `★ ${product.rating}`}
+                      {product.rating !== null && product.sold !== null && " · "}
+                      {product.sold !== null &&
+                        `${product.sold.toLocaleString("id-ID")} terjual`}
+                    </p>
+                  )}
+
+                  {product.sellerName ? (
+                    <div className={styles.sellerInfo}>
+                      {product.sellerImage && (
+                        <img
+                          className={styles.sellerAvatar}
+                          src={product.sellerImage}
+                          alt={`Foto profil ${product.sellerName}`}
+                        />
+                      )}
+
+                      <span>{product.sellerName}</span>
+                    </div>
+                  ) : (
+                    product.location && (
+                      <div className={styles.sellerInfo}>
+                        <span>📍 {product.location}</span>
+                      </div>
+                    )
+                  )}
                 </div>
               </div>
             ))}

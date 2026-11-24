@@ -1,168 +1,51 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./LacakPage.module.css";
-
-type TrackingStep = {
-  title: string;
-  description: string;
-  date: string;
-  done: boolean;
-};
-
-type Order = {
-  orderNumber: string;
-  storeName: string;
-  productName: string;
-  category: string;
-  image: string;
-  quantity: number;
-  price: number;
-  courier: string;
-  estimate: string;
-  status: string;
-  steps: TrackingStep[];
-};
-
-const orders: Order[] = [
-  {
-    orderNumber: "DGB001",
-    storeName: "TechStore Official",
-    productName: "Classic Sneakers",
-    category: "Shoes",
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600",
-    quantity: 1,
-    price: 459000,
-    courier: "J&T Express",
-    estimate: "24 November 2026",
-    status: "Dalam perjalanan",
-    steps: [
-      {
-        title: "Pesanan dibuat",
-        description: "Pesanan berhasil dibuat oleh pembeli.",
-        date: "21 November 2026, 09:00",
-        done: true,
-      },
-      {
-        title: "Pesanan dikemas",
-        description: "Penjual sedang menyiapkan paket.",
-        date: "21 November 2026, 11:30",
-        done: true,
-      },
-      {
-        title: "Diserahkan ke kurir",
-        description: "Paket sudah diterima oleh pihak kurir.",
-        date: "21 November 2026, 14:00",
-        done: true,
-      },
-      {
-        title: "Dalam perjalanan",
-        description: "Paket sedang dikirim menuju alamat tujuan.",
-        date: "21 November 2026, 16:00",
-        done: true,
-      },
-      {
-        title: "Pesanan diterima",
-        description: "Paket sudah sampai ke pembeli.",
-        date: "Belum tersedia",
-        done: false,
-      },
-    ],
-  },
-  {
-    orderNumber: "DGB002",
-    storeName: "Fashion House",
-    productName: "Minimalist Watch",
-    category: "Accessories",
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600",
-    quantity: 1,
-    price: 329000,
-    courier: "SiCepat",
-    estimate: "25 November 2026",
-    status: "Sedang dikemas",
-    steps: [
-      {
-        title: "Pesanan dibuat",
-        description: "Pesanan berhasil dibuat oleh pembeli.",
-        date: "21 November 2026, 10:15",
-        done: true,
-      },
-      {
-        title: "Pesanan dikemas",
-        description: "Penjual sedang menyiapkan paket.",
-        date: "21 November 2026, 13:00",
-        done: true,
-      },
-      {
-        title: "Diserahkan ke kurir",
-        description: "Paket akan diserahkan kepada kurir.",
-        date: "Belum tersedia",
-        done: false,
-      },
-      {
-        title: "Dalam perjalanan",
-        description: "Paket akan dikirim menuju alamat tujuan.",
-        date: "Belum tersedia",
-        done: false,
-      },
-      {
-        title: "Pesanan diterima",
-        description: "Paket sudah sampai ke pembeli.",
-        date: "Belum tersedia",
-        done: false,
-      },
-    ],
-  },
-  {
-    orderNumber: "DGB003",
-    storeName: "Bag Collection",
-    productName: "Everyday Backpack",
-    category: "Bags",
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600",
-    quantity: 1,
-    price: 275000,
-    courier: "J&T Express",
-    estimate: "27 November 2026",
-    status: "Pesanan dibuat",
-    steps: [
-      {
-        title: "Pesanan dibuat",
-        description: "Pesanan berhasil dibuat dan menunggu proses penjual.",
-        date: "22 November 2026, 10:00",
-        done: true,
-      },
-      {
-        title: "Pesanan dikemas",
-        description: "Menunggu penjual menyiapkan paket.",
-        date: "Belum tersedia",
-        done: false,
-      },
-      {
-        title: "Diserahkan ke kurir",
-        description: "Paket akan diserahkan kepada kurir.",
-        date: "Belum tersedia",
-        done: false,
-      },
-      {
-        title: "Dalam perjalanan",
-        description: "Paket akan dikirim menuju alamat tujuan.",
-        date: "Belum tersedia",
-        done: false,
-      },
-      {
-        title: "Pesanan diterima",
-        description: "Paket sudah sampai ke pembeli.",
-        date: "Belum tersedia",
-        done: false,
-      },
-    ],
-  },
-];
+import { getVisitorId } from "../../lib/chatService";
+import {
+  ORDER_RETENTION_DAYS,
+  seedDemoOrdersOnce,
+  subscribeToUserOrders,
+  type TrackedOrder,
+} from "../../lib/orderService";
 
 export default function LacakPage() {
+  const [orders, setOrders] = useState<TrackedOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState("Semua");
+
+  // Pesanan dibaca realtime dari Firestore (hanya milik pengunjung ini)
+  useEffect(() => {
+    const visitorId = getVisitorId();
+
+    // Simpan pesanan contoh ke Firestore sekali saja (jika belum pernah)
+    seedDemoOrdersOnce(visitorId).catch(() => {
+      setErrorMessage(
+        "Gagal menyimpan pesanan ke database. Periksa Firestore Rules."
+      );
+    });
+
+    const unsubscribe = subscribeToUserOrders(
+      visitorId,
+      (data) => {
+        setOrders(data);
+        setLoading(false);
+        setErrorMessage("");
+      },
+      () => {
+        setLoading(false);
+        setErrorMessage(
+          "Gagal terhubung ke database pesanan. Periksa koneksi internet dan Firestore Rules."
+        );
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
 
   const filters = [
     "Semua",
@@ -180,9 +63,9 @@ export default function LacakPage() {
   const formatPrice = (price: number) =>
     `Rp${price.toLocaleString("id-ID")}`;
 
-  const toggleDetails = (orderNumber: string) => {
+  const toggleDetails = (orderId: string) => {
     setExpandedOrder((current) =>
-      current === orderNumber ? null : orderNumber
+      current === orderId ? null : orderId
     );
   };
 
@@ -202,6 +85,15 @@ export default function LacakPage() {
       </section>
 
       <section className={styles.container}>
+        {errorMessage && (
+          <div className={styles.errorBanner}>{errorMessage}</div>
+        )}
+
+        <p className={styles.retentionNote}>
+          Pesanan disimpan {ORDER_RETENTION_DAYS} hari, setelah itu terhapus
+          otomatis.
+        </p>
+
         <div className={styles.orderSummary}>
           <div>
             <span>Total Pesanan</span>
@@ -253,11 +145,15 @@ export default function LacakPage() {
         </div>
 
         <div className={styles.orderList}>
-          {filteredOrders.length > 0 ? (
+          {loading ? (
+            <div className={styles.emptyState}>
+              <h3>Memuat pesanan...</h3>
+            </div>
+          ) : filteredOrders.length > 0 ? (
             filteredOrders.map((order) => (
               <article
                 className={styles.orderCard}
-                key={order.orderNumber}
+                key={order.id}
               >
                 <div className={styles.orderCardHeader}>
                   <div className={styles.storeInfo}>
@@ -290,33 +186,35 @@ export default function LacakPage() {
                   </span>
                 </div>
 
-                <div className={styles.productSection}>
-                  <div className={styles.productImage}>
-                    <img
-                      src={order.image}
-                      alt={order.productName}
-                    />
+                {order.items.map((item, itemIndex) => (
+                  <div
+                    className={styles.productSection}
+                    key={`${order.id}-${itemIndex}`}
+                  >
+                    <div className={styles.productImage}>
+                      {order.image && (
+                        <img src={order.image} alt={item.name} />
+                      )}
+                    </div>
+
+                    <div className={styles.productDetails}>
+                      <span className={styles.category}>
+                        {order.category}
+                      </span>
+
+                      <h3>{item.name}</h3>
+
+                      <p>{item.variant || "Variasi produk standar"}</p>
+
+                      <span className={styles.quantity}>x{item.qty}</span>
+                    </div>
+
+                    <div className={styles.productPrice}>
+                      <span>Harga Produk</span>
+                      <strong>{formatPrice(item.price)}</strong>
+                    </div>
                   </div>
-
-                  <div className={styles.productDetails}>
-                    <span className={styles.category}>
-                      {order.category}
-                    </span>
-
-                    <h3>{order.productName}</h3>
-
-                    <p>Variasi produk standar</p>
-
-                    <span className={styles.quantity}>
-                      x{order.quantity}
-                    </span>
-                  </div>
-
-                  <div className={styles.productPrice}>
-                    <span>Harga Produk</span>
-                    <strong>{formatPrice(order.price)}</strong>
-                  </div>
-                </div>
+                ))}
 
                 <div className={styles.deliveryInfo}>
                   <div>
@@ -332,7 +230,12 @@ export default function LacakPage() {
                   <div className={styles.totalPrice}>
                     <span>Total Pembayaran</span>
                     <strong>
-                      {formatPrice(order.price * order.quantity)}
+                      {formatPrice(
+                        order.items.reduce(
+                          (sum, item) => sum + item.price * item.qty,
+                          0
+                        )
+                      )}
                     </strong>
                   </div>
                 </div>
@@ -341,18 +244,18 @@ export default function LacakPage() {
                   <button
                     type="button"
                     className={styles.detailButton}
-                    onClick={() => toggleDetails(order.orderNumber)}
+                    onClick={() => toggleDetails(order.id)}
                   >
-                    {expandedOrder === order.orderNumber
+                    {expandedOrder === order.id
                       ? "Tutup Detail"
                       : "Lihat Detail Pesanan"}
                     <span>
-                      {expandedOrder === order.orderNumber ? "−" : "+"}
+                      {expandedOrder === order.id ? "−" : "+"}
                     </span>
                   </button>
                 </div>
 
-                {expandedOrder === order.orderNumber && (
+                {expandedOrder === order.id && (
                   <div className={styles.trackingDetails}>
                     <h3>Riwayat Pengiriman</h3>
 
