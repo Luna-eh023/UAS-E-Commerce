@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import Script from "next/script";
 import Link from "next/link";
+import WishlistProvider from "@/components/WishlistProvider";
+import WishlistNav from "@/components/WishlistNav";
 import ThemeToggle from "@/components/ThemeToggle";
 import FlashSalePopup from "@/components/FlashSalePopup";
 import "./globals.css";
@@ -29,46 +31,48 @@ export default function RootLayout({
   return (
     <html lang="id" data-bs-theme="light" suppressHydrationWarning>
       <AuthProvider>
-        <body>
-          <Script
-            id="theme-init"
-            strategy="beforeInteractive"
-            dangerouslySetInnerHTML={{ __html: themeScript }}
-          />
-          <FlashSalePopup />
+        <WishlistProvider>
+          <body>
+            <Script
+              id="theme-init"
+              strategy="beforeInteractive"
+              dangerouslySetInnerHTML={{ __html: themeScript }}
+            />
+            <FlashSalePopup />
 
-          <header className="bg-body border-bottom shadow-sm sticky-top">
-            <div className="container d-flex align-items-center justify-content-between py-3">
+            <header className="bg-body border-bottom shadow-sm sticky-top">
+              <div className="container d-flex align-items-center justify-content-between py-3">
 
-              <Link
-                href="/products"
-                className="d-flex align-items-center gap-2 text-decoration-none"
-              >
-                <span className={`logo-mark ${poppins.className}`}>d</span>
-                <span className={`logo-text ${poppins.className}`}>digeboy</span>
-              </Link>
-
-              <div className="d-flex align-items-center gap-3">
                 <Link
                   href="/products"
-                  className="text-decoration-none text-body d-none d-sm-inline"
+                  className="d-flex align-items-center gap-2 text-decoration-none"
                 >
-                  Produk
+                  <span className={`logo-mark ${poppins.className}`}>d</span>
+                  <span className={`logo-text ${poppins.className}`}>digeboy</span>
                 </Link>
-                <Link
-                  href="/orders"
-                  className="text-decoration-none text-muted d-none d-sm-inline"
-                >
-                  Pesanan Saya
-                </Link>
-                <AuthNav />
-                <ThemeToggle />
-              </div>
-            </div>
-          </header>
 
-          {children}
-        </body>
+                <div className="d-flex align-items-center gap-3">
+                  <Link
+                    href="/products"
+                    className="text-decoration-none text-body d-none d-sm-inline"
+                  >
+                    Produk
+                  </Link>
+                  <Link
+                    href="/orders"
+                    className="text-decoration-none text-muted d-none d-sm-inline"
+                  >
+                    Pesanan Saya
+                  </Link>
+                  <AuthNav />
+                  <ThemeToggle />
+                </div>
+              </div>
+            </header>
+
+            {children}
+          </body>
+        </WishlistProvider>
       </AuthProvider>
     </html >
   );

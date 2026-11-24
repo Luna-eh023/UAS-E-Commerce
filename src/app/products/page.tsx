@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useWishlist } from "@/components/WishlistProvider";
 import styles from "./products.module.css";
 import { CATEGORIES, LOCATIONS, Product, getProducts, seedProducts } from "@/lib/products";
 
@@ -12,7 +13,7 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const { ids, toggle: toggleWish } = useWishlist();
   const [search, setSearch] = useState("");
   const [cats, setCats] = useState<string[]>([]);
   const [locs, setLocs] = useState<string[]>([]);
@@ -167,6 +168,13 @@ export default function ProductsPage() {
             {result.map((p) => (
               <article key={p.id} className={styles.card}>
                 <div className={styles.thumb} aria-hidden>{p.emoji}</div>
+                <button
+                  className={styles.heart}
+                  aria-label={ids.has(p.id) ? "Hapus dari wishlist" : "Tambah ke wishlist"}
+                  onClick={() => toggleWish(p)}
+                >
+                  {ids.has(p.id) ? "♥" : "♡"}
+                </button>
                 <div className={styles.info}>
                   <h4>{p.name}</h4>
                   {p.originalPrice && <s className={styles.old}>{rupiah(p.originalPrice)}</s>}

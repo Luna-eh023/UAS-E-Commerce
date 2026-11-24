@@ -206,6 +206,25 @@
   overflow: hidden;
 }
 
+.card {
+  position: relative;
+}
+
+.heart {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  font-size: 1.2rem;
+  color: #e53935;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
+}
+
 .thumb {
   height: 150px;
   display: grid;

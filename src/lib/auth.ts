@@ -9,7 +9,11 @@ import { auth } from "./firebase";
 export async function register(name: string, email: string, password: string) {
   const cred = await createUserWithEmailAndPassword(auth, email, password);
   await updateProfile(cred.user, { displayName: name });
-  await sendEmailVerification(cred.user);
+  try {
+    await sendEmailVerification(cred.user);
+  } catch {
+    // email verifikasi gagal terkirim, pendaftaran tetap dianggap berhasil
+  }
   return cred.user;
 }
 
