@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -18,6 +19,7 @@ import {
   advanceStatus,
   backfillStoreLogos,
   buyAgain,
+  canRefund,
   formatRupiah,
   getOrders,
   refundOrder,
@@ -36,6 +38,7 @@ type ToastState = {
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState<Filter>("semua");
   const [search, setSearch] = useState("");
@@ -62,6 +65,7 @@ export default function OrdersPage() {
       })
       .catch((err) => {
         console.error(err);
+
         if (active) {
           setError(
             "Gagal memuat pesanan. Periksa konfigurasi Firebase dan aturan Firestore."
@@ -78,21 +82,33 @@ export default function OrdersPage() {
   }, []);
 
   const refresh = async () => {
-    setOrders(await getOrders());
+    const data = await getOrders();
+    setOrders(data);
   };
 
   const showToast = (message: string, variant: "success" | "danger") => {
     setToast({ show: true, message, variant });
   };
 
-  const run = async (action: () => Promise<void>, successMessage: string) => {
+  const run = async (
+    action: () => Promise<void>,
+    successMessage: string
+  ): Promise<boolean> => {
+    if (busy) return false;
+
+    setBusy(true);
+
     try {
       await action();
       await refresh();
       showToast(successMessage, "success");
+      return true;
     } catch (err) {
       console.error(err);
       showToast("Terjadi kesalahan, coba lagi.", "danger");
+      return false;
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -109,30 +125,58 @@ export default function OrdersPage() {
     );
 
   const openReview = (order: Order) => {
+    if (busy) return;
+
     setReviewTarget(order);
     setRating(0);
     setComment("");
   };
 
   const handleSubmitReview = async () => {
-    if (!reviewTarget) return;
+    if (!reviewTarget || busy) return;
+
     if (rating === 0) {
       showToast("Pilih jumlah bintang dulu.", "danger");
       return;
     }
+
     const target = reviewTarget;
-    setReviewTarget(null);
-    await run(
+
+    const success = await run(
       () => submitReview(target.id, rating, comment),
       "Ulasan berhasil dikirim."
     );
+
+    if (success) {
+      setReviewTarget(null);
+      setRating(0);
+      setComment("");
+    }
   };
 
   const handleConfirmRefund = async () => {
-    if (!refundTarget) return;
+    if (!refundTarget || busy) return;
+
     const target = refundTarget;
-    setRefundTarget(null);
-    await run(() => refundOrder(target.id), "Pengajuan pengembalian dana berhasil.");
+
+    if (!canRefund(target)) {
+      setRefundTarget(null);
+      showToast(
+        "Pesanan tidak memenuhi syarat pengembalian dana.",
+        "danger"
+      );
+      await refresh().catch(console.error);
+      return;
+    }
+
+    const success = await run(
+      () => refundOrder(target.id),
+      "Pengajuan pengembalian dana berhasil."
+    );
+
+    if (success) {
+      setRefundTarget(null);
+    }
   };
 
   const keyword = search.trim().toLowerCase();
@@ -143,11 +187,15 @@ export default function OrdersPage() {
       : orders.filter(
           (o) =>
             o.storeName.toLowerCase().includes(keyword) ||
-            o.items.some((item) => item.name.toLowerCase().includes(keyword))
+            o.items.some((item) =>
+              item.name.toLowerCase().includes(keyword)
+            )
         );
 
   const visibleOrders =
-    filter === "semua" ? searched : searched.filter((o) => o.status === filter);
+    filter === "semua"
+      ? searched
+      : searched.filter((o) => o.status === filter);
 
   const countOf = (status: OrderStatus) =>
     searched.filter((o) => o.status === status).length;
@@ -171,19 +219,24 @@ export default function OrdersPage() {
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
         </span>
+
         <input
           type="text"
-          className={`form-control ${search === "" ? "rounded-end-pill" : ""}`}
+          className={`form-control ${
+            search === "" ? "rounded-end-pill" : ""
+          }`}
           placeholder="Cari pesanan Anda (nama toko atau barang)"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           aria-label="Cari pesanan"
         />
+
         {search !== "" && (
           <button
             type="button"
             className="btn btn-outline-secondary rounded-end-pill px-3"
             onClick={() => setSearch("")}
+            disabled={busy}
           >
             Hapus
           </button>
@@ -206,6 +259,7 @@ export default function OrdersPage() {
             Semua ({searched.length})
           </Nav.Link>
         </Nav.Item>
+
         {STATUS_FLOW.map((status) => (
           <Nav.Item key={status}>
             <Nav.Link eventKey={status} className="text-nowrap">
@@ -218,6 +272,7 @@ export default function OrdersPage() {
       {loading && (
         <div className="text-center py-5">
           <Spinner animation="border" />
+          <p className="text-muted mt-2">Memuat pesanan...</p>
         </div>
       )}
 
@@ -226,8 +281,20 @@ export default function OrdersPage() {
       {!loading && !error && orders.length === 0 && (
         <div className="text-center py-5">
           <p className="text-muted">Belum ada pesanan.</p>
-          <Button variant="primary" onClick={handleSeed}>
-            Buat Data Contoh
+
+          <Button
+            variant="primary"
+            onClick={handleSeed}
+            disabled={busy}
+          >
+            {busy ? (
+              <>
+                <Spinner size="sm" className="me-2" />
+                Membuat data...
+              </>
+            ) : (
+              "Buat Data Contoh"
+            )}
           </Button>
         </div>
       )}
@@ -251,12 +318,23 @@ export default function OrdersPage() {
         />
       ))}
 
-      <Modal show={reviewTarget !== null} onHide={() => setReviewTarget(null)} centered>
-        <Modal.Header closeButton>
+      {/* Modal Review */}
+      <Modal
+        show={reviewTarget !== null}
+        onHide={() => {
+          if (!busy) setReviewTarget(null);
+        }}
+        centered
+      >
+        <Modal.Header closeButton={!busy}>
           <Modal.Title>Tulis Ulasan</Modal.Title>
         </Modal.Header>
+
         <Modal.Body>
-          <p className="text-muted small mb-2">{reviewTarget?.storeName}</p>
+          <p className="text-muted small mb-2">
+            {reviewTarget?.storeName}
+          </p>
+
           <div className="mb-3" aria-label="Pilih bintang">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
@@ -265,60 +343,120 @@ export default function OrdersPage() {
                 className="btn btn-link p-0 me-1 fs-2 text-decoration-none text-warning"
                 onClick={() => setRating(star)}
                 aria-label={`${star} bintang`}
+                disabled={busy}
               >
                 {star <= rating ? "★" : "☆"}
               </button>
             ))}
           </div>
+
           <Form.Group>
             <Form.Label>Komentar (opsional)</Form.Label>
+
             <Form.Control
               as="textarea"
               rows={3}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Ceritakan pengalaman belanja kamu..."
+              disabled={busy}
             />
           </Form.Group>
         </Modal.Body>
+
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setReviewTarget(null)}>
+          <Button
+            variant="secondary"
+            onClick={() => setReviewTarget(null)}
+            disabled={busy}
+          >
             Batal
           </Button>
-          <Button variant="primary" onClick={handleSubmitReview}>
-            Kirim Ulasan
+
+          <Button
+            variant="primary"
+            onClick={handleSubmitReview}
+            disabled={busy}
+          >
+            {busy ? (
+              <>
+                <Spinner size="sm" className="me-2" />
+                Mengirim...
+              </>
+            ) : (
+              "Kirim Ulasan"
+            )}
           </Button>
         </Modal.Footer>
       </Modal>
 
-      <Modal show={refundTarget !== null} onHide={() => setRefundTarget(null)} centered>
-        <Modal.Header closeButton>
+      {/* Modal Refund */}
+      <Modal
+        show={refundTarget !== null}
+        onHide={() => {
+          if (!busy) setRefundTarget(null);
+        }}
+        centered
+      >
+        <Modal.Header closeButton={!busy}>
           <Modal.Title>Kembalikan Dana</Modal.Title>
         </Modal.Header>
+
         <Modal.Body>
           Ajukan pengembalian dana sebesar{" "}
-          <b>{refundTarget ? formatRupiah(refundTarget.total) : ""}</b> untuk
-          pesanan dari <b>{refundTarget?.storeName}</b>?
+          <b>
+            {refundTarget
+              ? formatRupiah(refundTarget.total)
+              : ""}
+          </b>{" "}
+          untuk pesanan dari{" "}
+          <b>{refundTarget?.storeName}</b>?
         </Modal.Body>
+
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setRefundTarget(null)}>
+          <Button
+            variant="secondary"
+            onClick={() => setRefundTarget(null)}
+            disabled={busy}
+          >
             Batal
           </Button>
-          <Button variant="danger" onClick={handleConfirmRefund}>
-            Ya, Kembalikan Dana
+
+          <Button
+            variant="danger"
+            onClick={handleConfirmRefund}
+            disabled={busy}
+          >
+            {busy ? (
+              <>
+                <Spinner size="sm" className="me-2" />
+                Memproses...
+              </>
+            ) : (
+              "Ya, Kembalikan Dana"
+            )}
           </Button>
         </Modal.Footer>
       </Modal>
 
-      <ToastContainer position="bottom-end" className="p-3" style={{ position: "fixed" }}>
+      {/* Toast Notification */}
+      <ToastContainer
+        position="bottom-end"
+        className="p-3"
+        style={{ position: "fixed" }}
+      >
         <Toast
           show={toast.show}
-          onClose={() => setToast((prev) => ({ ...prev, show: false }))}
+          onClose={() =>
+            setToast((prev) => ({ ...prev, show: false }))
+          }
           delay={3000}
           autohide
           bg={toast.variant}
         >
-          <Toast.Body className="text-white">{toast.message}</Toast.Body>
+          <Toast.Body className="text-white">
+            {toast.message}
+          </Toast.Body>
         </Toast>
       </ToastContainer>
     </main>

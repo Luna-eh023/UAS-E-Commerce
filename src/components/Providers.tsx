@@ -2,11 +2,19 @@
 
 import type { ReactNode } from "react";
 import { CartProvider } from "@/components/CartContext";
+import { AuthProvider } from "@/components/AuthProvider";
+import { WishlistProvider } from "@/components/WishlistContext";
 
 export default function Providers({
   children,
 }: {
   children: ReactNode;
 }) {
-  return <CartProvider>{children}</CartProvider>;
+  return (
+    <AuthProvider>
+      <CartProvider>
+        <WishlistProvider>{children}</WishlistProvider>
+      </CartProvider>
+    </AuthProvider>
+  );
 }

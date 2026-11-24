@@ -15,14 +15,17 @@ export default function Home() {
   const { addToCart } = useCart();
 
   const filteredProducts = useMemo(() => {
+    const searchKeyword = search.trim().toLowerCase();
+
     return PRODUCTS.filter((product) => {
       const matchesCategory =
         selectedCategory === "Semua" ||
         product.category === selectedCategory;
 
-      const matchesSearch = product.name
-        .toLowerCase()
-        .includes(search.toLowerCase());
+      const matchesSearch =
+        product.name.toLowerCase().includes(searchKeyword) ||
+        product.category.toLowerCase().includes(searchKeyword) ||
+        product.description.toLowerCase().includes(searchKeyword);
 
       return matchesCategory && matchesSearch;
     });
@@ -30,6 +33,11 @@ export default function Home() {
 
   function handleAddToCart(product: Product) {
     addToCart(product);
+  }
+
+  function handleResetSearch() {
+    setSearch("");
+    setSelectedCategory("Semua");
   }
 
   return (
@@ -49,18 +57,37 @@ export default function Home() {
       <DashboardBanner />
 
       <div className="mb-4">
-        <label htmlFor="product-search" className="form-label fw-semibold">
+        <label
+          htmlFor="product-search"
+          className="form-label fw-semibold"
+        >
           Cari Produk
         </label>
 
-        <input
-          id="product-search"
-          type="text"
-          className="form-control form-control-lg"
-          placeholder="Cari nama produk..."
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-        />
+        <div className="input-group">
+          <input
+            id="product-search"
+            type="text"
+            className="form-control form-control-lg"
+            placeholder="Cari nama, kategori, atau deskripsi..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+
+          {search && (
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={() => setSearch("")}
+            >
+              Hapus
+            </button>
+          )}
+        </div>
+
+        <small className="text-muted mt-2 d-block">
+          Cari produk berdasarkan nama, kategori, atau deskripsi.
+        </small>
       </div>
 
       <CategoryList
@@ -72,6 +99,18 @@ export default function Home() {
         products={filteredProducts}
         onAddToCart={handleAddToCart}
       />
+
+      {search || selectedCategory !== "Semua" ? (
+        <div className="text-center mt-4">
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={handleResetSearch}
+          >
+            Reset Pencarian dan Kategori
+          </button>
+        </div>
+      ) : null}
     </main>
   );
 }

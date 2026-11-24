@@ -1,3 +1,4 @@
+
 import {
   addDoc,
   collection,
@@ -7,6 +8,7 @@ import {
   query,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -27,7 +29,6 @@ export type AppNotification = {
 type NewNotification = Omit<AppNotification, "id">;
 
 const NOTIFICATIONS = "notifications";
-
 const HOUR = 60 * 60 * 1000;
 
 export const GROUP_ORDER = ["Hari Ini", "Minggu Ini", "Bulan Ini", "Lebih Lama"];
@@ -44,49 +45,132 @@ export const TYPE_COLOR: Record<NotifType, string> = {
   promo: "danger",
 };
 
+function isValidDate(iso: string): boolean {
+  return Number.isFinite(new Date(iso).getTime());
+}
+
 export function relativeTime(iso: string): string {
-  const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (!isValidDate(iso)) return "waktu tidak diketahui";
+
+  const diff = Math.max(0, Date.now() - new Date(iso).getTime());
+  const minutes = Math.floor(diff / 60000);
+
   if (minutes < 1) return "baru saja";
   if (minutes < 60) return `${minutes} menit lalu`;
+
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours} jam lalu`;
+
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days} hari lalu`;
   if (days < 30) return `${Math.floor(days / 7)} minggu lalu`;
+
   return `${Math.floor(days / 30)} bulan lalu`;
 }
 
 export function groupLabel(iso: string): string {
-  const hours = (Date.now() - new Date(iso).getTime()) / HOUR;
-  if (hours < 24) return "Hari Ini";
-  if (hours < 24 * 7) return "Minggu Ini";
-  if (hours < 24 * 30) return "Bulan Ini";
+  if (!isValidDate(iso)) return "Lebih Lama";
+
+  const date = new Date(iso);
+  const now = new Date();
+
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
+
+  const startOfTomorrow = new Date(startOfToday);
+  startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+
+  const startOfWeek = new Date(startOfToday);
+  const day = startOfWeek.getDay();
+  const mondayOffset = day === 0 ? 6 : day - 1;
+  startOfWeek.setDate(startOfWeek.getDate() - mondayOffset);
+
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  if (date >= startOfToday && date < startOfTomorrow) {
+    return "Hari Ini";
+  }
+
+  if (date >= startOfWeek && date < startOfToday) {
+    return "Minggu Ini";
+  }
+
+  if (date >= startOfMonth && date < startOfWeek) {
+    return "Bulan Ini";
+  }
+
   return "Lebih Lama";
 }
 
+function isNotifType(value: unknown): value is NotifType {
+  return value === "pesanan" || value === "chat" || value === "promo";
+}
+
 export async function getNotifications(): Promise<AppNotification[]> {
-  const q = query(collection(db, NOTIFICATIONS), orderBy("createdAt", "desc"));
+  const q = query(
+    collection(db, NOTIFICATIONS),
+    orderBy("createdAt", "desc")
+  );
+
   const snapshot = await getDocs(q);
+
   return snapshot.docs
-    .map((d) => ({
-      id: d.id,
-      ...(d.data() as Omit<AppNotification, "id">),
-    }))
-    .filter((n) => typeof n.title === "string");
+    .map((d) => {
+      const data = d.data();
+
+      return {
+        id: d.id,
+        type: data.type,
+        title: data.title,
+        message: data.message,
+        createdAt: data.createdAt,
+        read: data.read,
+        image: data.image ?? null,
+        href: data.href ?? null,
+        actionLabel: data.actionLabel ?? "",
+      } as AppNotification;
+    })
+    .filter(
+      (n) =>
+        typeof n.title === "string" &&
+        typeof n.message === "string" &&
+        typeof n.createdAt === "string" &&
+        isNotifType(n.type) &&
+        typeof n.read === "boolean"
+    );
 }
 
 export async function getUnreadCount(): Promise<number> {
-  const q = query(collection(db, NOTIFICATIONS), where("read", "==", false));
+  const q = query(
+    collection(db, NOTIFICATIONS),
+    where("read", "==", false)
+  );
+
   const snapshot = await getDocs(q);
   return snapshot.size;
 }
 
 export async function markRead(id: string): Promise<void> {
-  await updateDoc(doc(db, NOTIFICATIONS, id), { read: true });
+  await updateDoc(doc(db, NOTIFICATIONS, id), {
+    read: true,
+  });
 }
 
 export async function markAllRead(ids: string[]): Promise<void> {
-  await Promise.all(ids.map((id) => markRead(id)));
+  if (ids.length === 0) return;
+
+  const batch = writeBatch(db);
+
+  ids.forEach((id) => {
+    batch.update(doc(db, NOTIFICATIONS, id), {
+      read: true,
+    });
+  });
+
+  await batch.commit();
 }
 
 function make(
@@ -205,5 +289,12 @@ export async function seedNotifications(): Promise<void> {
     ),
   ];
 
-  await Promise.all(samples.map((s) => addDoc(collection(db, NOTIFICATIONS), s)));
+  const batch = writeBatch(db);
+
+  samples.forEach((sample, index) => {
+    const ref = doc(db, NOTIFICATIONS, `demo-notification-${index + 1}`);
+    batch.set(ref, sample);
+  });
+
+  await batch.commit();
 }

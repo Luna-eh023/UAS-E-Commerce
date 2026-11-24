@@ -179,17 +179,16 @@ export default function CartPage() {
                     </span>
                   </div>
 
-                  <button
-                    type="button"
+                  <Link
+                    href="/checkout"
                     className="btn btn-success w-100"
-                    disabled
                   >
-                    Checkout (Tahap Berikutnya)
-                  </button>
+                    Checkout
+                  </Link>
 
                   <p className="text-muted small mt-3 mb-0">
-                    Fitur checkout akan dikembangkan pada tahap
-                    berikutnya.
+                    Lanjutkan untuk mengisi alamat, memilih pengiriman,
+                    dan metode pembayaran.
                   </p>
                 </div>
               </div>
