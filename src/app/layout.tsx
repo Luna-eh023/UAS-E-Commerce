@@ -1,7 +1,14 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-jakarta",
+});
 
 export const metadata: Metadata = {
   title: "Digeboy E-Commerce",
@@ -15,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body>
+      <body className={plusJakartaSans.className}>
         <header className="siteHeader">
           <div className="siteHeaderInner">
             <Link href="/" className="brand">
