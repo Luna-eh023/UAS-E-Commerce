@@ -1,246 +1,311 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import Button from "react-bootstrap/Button";
-import Modal from "react-bootstrap/Modal";
-import Mascot from "./Mascot";
-import { formatRupiah } from "@/lib/orders";
 import styles from "./FlashSalePopup.module.css";
 
 type Mode = "upcoming" | "live";
 
-const SESSION_KEY = "digeboy-flash-sale-seen";
-const SECOND = 1000;
-const MINUTE = 60 * SECOND;
-const HOUR = 60 * MINUTE;
-const DAY = 24 * HOUR;
-
-const DURATIONS: Record<Mode, number> = {
-  upcoming: 2 * DAY + 5 * HOUR + 12 * MINUTE,
-  live: 3 * HOUR + 25 * MINUTE,
+type Product = {
+  id: number;
+  name: string;
+  image: string;
+  originalPrice: number;
+  salePrice: number;
 };
 
-const PRODUCTS = [
+const PRODUCTS: Product[] = [
   {
+    id: 1,
     name: "Earphone Bluetooth TWS",
     image: "/images/tws.jpg",
-    price: 149000,
+    originalPrice: 149000,
     salePrice: 89000,
   },
   {
+    id: 2,
     name: "Mouse Wireless Slim",
     image: "/images/mousewireless.webp",
-    price: 85000,
+    originalPrice: 85000,
     salePrice: 49000,
   },
   {
+    id: 3,
     name: "Power Bank 10000mAh",
     image: "/images/powerbank10000mah.webp",
-    price: 189000,
+    originalPrice: 189000,
     salePrice: 119000,
   },
 ];
 
-function discountOf(price: number, salePrice: number): number {
-  return Math.round((1 - salePrice / price) * 100);
+const UPCOMING_DURATION =
+  2 * 24 * 60 * 60 * 1000 +
+  5 * 60 * 60 * 1000 +
+  12 * 60 * 1000;
+
+const LIVE_DURATION =
+  3 * 60 * 60 * 1000 +
+  25 * 60 * 1000;
+
+function formatRupiah(value: number) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(value);
 }
 
-function pad(value: number): string {
-  return String(value).padStart(2, "0");
-}
+function getCountdown(target: number, now: number) {
+  const difference = Math.max(0, target - now);
 
-const MAX_DISCOUNT = Math.max(
-  ...PRODUCTS.map((p) => discountOf(p.price, p.salePrice))
-);
+  const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+  const hours = Math.floor(
+    (difference / (1000 * 60 * 60)) % 24
+  );
+  const minutes = Math.floor(
+    (difference / (1000 * 60)) % 60
+  );
+  const seconds = Math.floor(
+    (difference / 1000) % 60
+  );
+
+  return { days, hours, minutes, seconds };
+}
 
 export default function FlashSalePopup() {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<Mode>("upcoming");
-  const [target, setTarget] = useState(() => Date.now() + DURATIONS.upcoming);
-  const [now, setNow] = useState(() => Date.now());
+  const [target, setTarget] = useState(0);
+  const [now, setNow] = useState(0);
   const [reminder, setReminder] = useState(false);
 
+  // Popup muncul otomatis saat halaman dibuka.
   useEffect(() => {
-    let seen = false;
-    try {
-      seen = sessionStorage.getItem(SESSION_KEY) === "1";
-    } catch {}
-    if (seen) return;
-
-    const id = window.setTimeout(() => {
-      const current = Date.now();
-      setTarget(current + DURATIONS.upcoming);
-      setNow(current);
+    const timeout = window.setTimeout(() => {
+      setMode("upcoming");
+      setTarget(Date.now() + UPCOMING_DURATION);
+      setNow(Date.now());
       setOpen(true);
-    }, 900);
+    }, 1000);
 
-    return () => window.clearTimeout(id);
+    return () => window.clearTimeout(timeout);
   }, []);
 
+  // Countdown berjalan setiap detik.
   useEffect(() => {
     if (!open) return;
-    const id = window.setInterval(() => setNow(Date.now()), SECOND);
-    return () => window.clearInterval(id);
+
+    const interval = window.setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+
+    return () => window.clearInterval(interval);
   }, [open]);
 
-  const close = () => {
+  function switchMode(nextMode: Mode) {
+    setMode(nextMode);
+    setTarget(
+      Date.now() +
+        (nextMode === "upcoming"
+          ? UPCOMING_DURATION
+          : LIVE_DURATION)
+    );
+    setNow(Date.now());
+    setReminder(false);
+  }
+
+  function closePopup() {
     setOpen(false);
-    try {
-      sessionStorage.setItem(SESSION_KEY, "1");
-    } catch {}
-  };
+  }
 
-  const switchMode = (next: Mode) => {
-    const current = Date.now();
-    setMode(next);
-    setTarget(current + DURATIONS[next]);
-    setNow(current);
-  };
+  if (!open) return null;
 
-  const remaining = Math.max(0, target - now);
-  const days = Math.floor(remaining / DAY);
-  const hours = Math.floor((remaining % DAY) / HOUR);
-  const minutes = Math.floor((remaining % HOUR) / MINUTE);
-  const seconds = Math.floor((remaining % MINUTE) / SECOND);
-  const live = mode === "live";
-
-  const boxes = live
-    ? [
-        { label: "Jam", value: hours + days * 24 },
-        { label: "Menit", value: minutes },
-        { label: "Detik", value: seconds },
-      ]
-    : [
-        { label: "Hari", value: days },
-        { label: "Jam", value: hours },
-        { label: "Menit", value: minutes },
-        { label: "Detik", value: seconds },
-      ];
+  const countdown = getCountdown(target, now);
 
   return (
-    <Modal show={open} onHide={close} centered contentClassName={styles.content}>
-      <div className={styles.banner}>
+    <div className={styles.overlay}>
+      <div
+        className={styles.popup}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Flash Sale Digeboy"
+      >
+        {/* Tombol close */}
         <button
           type="button"
-          className={`btn-close btn-close-white ${styles.close}`}
-          aria-label="Tutup"
-          onClick={close}
-        />
-        <div className={styles.mascotWrap}>
-          <Mascot />
-        </div>
-        <span
-          className={`${styles.pill} ${live ? styles.pillLive : styles.pillSoon}`}
+          className={styles.closeButton}
+          onClick={closePopup}
+          aria-label="Tutup popup"
         >
-          {live && <span className={styles.dot} />}
-          {live ? "Sedang berlangsung" : "Segera dimulai"}
-        </span>
-        <h2 className={styles.title}>
-          {live
-            ? "Flash Sale lagi berlangsung!"
-            : "Flash Sale dimulai sebentar lagi!"}
-        </h2>
-      </div>
-
-      <div className="p-4">
-        <p className="text-muted text-center mb-3">
-          {live
-            ? `Buruan, diskon hingga ${MAX_DISCOUNT}% akan segera berakhir dan stok terbatas.`
-            : `Siapkan keranjangmu. Diskon hingga ${MAX_DISCOUNT}% untuk aksesoris gadget pilihan.`}
-        </p>
-
-        <div className="text-center small fw-semibold text-muted mb-2">
-          {live ? "Berakhir dalam" : "Dimulai dalam"}
-        </div>
-        <div className={styles.countdown}>
-          {boxes.map((b) => (
-            <div key={b.label} className={styles.box}>
-              <div
-                key={b.label === "Detik" ? b.value : "static"}
-                className={`${styles.num} ${b.label === "Detik" ? styles.tick : ""}`}
-              >
-                {pad(b.value)}
-              </div>
-              <div className={styles.unit}>{b.label}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className={styles.products}>
-          {PRODUCTS.map((p, i) => (
-            <div
-              key={p.name}
-              className={styles.card}
-              style={{ "--i": i } as React.CSSProperties}
-            >
-              <span className={styles.off}>
-                -{discountOf(p.price, p.salePrice)}%
-              </span>
-              <div className={styles.imageWrap}>
-                <Image
-                  src={p.image}
-                  alt={p.name}
-                  fill
-                  sizes="160px"
-                  style={{ objectFit: "cover" }}
-                />
-              </div>
-              <div className={styles.info}>
-                <div className={styles.pname}>{p.name}</div>
-                <div className={styles.sale}>{formatRupiah(p.salePrice)}</div>
-                <div className={styles.old}>{formatRupiah(p.price)}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {live ? (
-          <Link
-            href="/"
-            className="btn btn-primary btn-lg w-100 fw-bold"
-            onClick={close}
-          >
-            Belanja Sekarang
-          </Link>
-        ) : (
-          <Button
-            variant={reminder ? "outline-primary" : "primary"}
-            size="lg"
-            className="w-100 fw-bold"
-            onClick={() => setReminder((prev) => !prev)}
-          >
-            {reminder ? "✓ Pengingat Aktif" : "Ingatkan Saya"}
-          </Button>
-        )}
-        <button
-          type="button"
-          className="btn btn-link text-muted w-100 mt-1"
-          onClick={close}
-        >
-          Nanti saja
+          &times;
         </button>
 
-        <div className={styles.sim}>
-          Simulasi:
+        {/* Header */}
+        <div className={styles.header}>
+          <div className={styles.brand}>
+            <span className={styles.brandIcon}>d</span>
+            <span>DIGeboy</span>
+          </div>
+
+          <div className={styles.saleLabel}>
+            FLASH SALE
+          </div>
+
+          <h2 className={styles.title}>
+            {mode === "upcoming"
+              ? "BERSIAP UNTUK FLASH SALE!"
+              : "FLASH SALE SEDANG BERLANGSUNG!"}
+          </h2>
+
+          <p className={styles.subtitle}>
+            {mode === "upcoming"
+              ? "Jangan sampai ketinggalan diskon spesial!"
+              : "Buruan checkout sebelum harga kembali normal!"}
+          </p>
+        </div>
+
+        {/* Countdown */}
+        <div className={styles.countdownSection}>
+          <p className={styles.countdownLabel}>
+            {mode === "upcoming"
+              ? "FLASH SALE DIMULAI DALAM"
+              : "FLASH SALE BERAKHIR DALAM"}
+          </p>
+
+          <div className={styles.countdown}>
+            {mode === "upcoming" && (
+              <>
+                <div className={styles.timeBox}>
+                  <strong>{countdown.days}</strong>
+                  <span>Hari</span>
+                </div>
+                <span className={styles.separator}>:</span>
+              </>
+            )}
+
+            <div className={styles.timeBox}>
+              <strong>
+                {String(countdown.hours).padStart(2, "0")}
+              </strong>
+              <span>Jam</span>
+            </div>
+
+            <span className={styles.separator}>:</span>
+
+            <div className={styles.timeBox}>
+              <strong>
+                {String(countdown.minutes).padStart(2, "0")}
+              </strong>
+              <span>Menit</span>
+            </div>
+
+            <span className={styles.separator}>:</span>
+
+            <div className={styles.timeBox}>
+              <strong>
+                {String(countdown.seconds).padStart(2, "0")}
+              </strong>
+              <span>Detik</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Products */}
+        <div className={styles.productSection}>
+          <h3>
+            {mode === "upcoming"
+              ? "Produk Pilihan Flash Sale"
+              : "Produk Flash Sale"}
+          </h3>
+
+          <div className={styles.productGrid}>
+            {PRODUCTS.map((product) => (
+              <div
+                className={styles.productCard}
+                key={product.id}
+              >
+                <div className={styles.imageWrapper}>
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    fill
+                    sizes="(max-width: 600px) 100px, 180px"
+                    className={styles.productImage}
+                  />
+
+                  <span className={styles.discountBadge}>
+                    SALE
+                  </span>
+                </div>
+
+                <div className={styles.productInfo}>
+                  <p className={styles.productName}>
+                    {product.name}
+                  </p>
+
+                  <p className={styles.originalPrice}>
+                    {formatRupiah(product.originalPrice)}
+                  </p>
+
+                  <p className={styles.salePrice}>
+                    {formatRupiah(product.salePrice)}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className={styles.actions}>
+          {mode === "upcoming" ? (
+            <button
+              type="button"
+              className={styles.primaryButton}
+              onClick={() => setReminder(!reminder)}
+            >
+              {reminder
+                ? "✓ Pengingat Diaktifkan"
+                : "🔔 Ingatkan Saya"}
+            </button>
+          ) : (
+            <Link
+              href="/"
+              className={styles.primaryButton}
+              onClick={closePopup}
+            >
+              Belanja Sekarang
+            </Link>
+          )}
+
           <button
             type="button"
-            className={`${styles.simBtn} ${!live ? styles.simActive : ""}`}
+            className={styles.secondaryButton}
+            onClick={closePopup}
+          >
+            Nanti Saja
+          </button>
+        </div>
+
+        {/* Testing controls */}
+        <div className={styles.testing}>
+          <button
+            type="button"
             onClick={() => switchMode("upcoming")}
           >
-            Akan dimulai
+            Simulasi Upcoming
           </button>
-          ·
+
           <button
             type="button"
-            className={`${styles.simBtn} ${live ? styles.simActive : ""}`}
             onClick={() => switchMode("live")}
           >
-            Sedang berlangsung
+            Simulasi Live
           </button>
         </div>
       </div>
-    </Modal>
+    </div>
   );
 }

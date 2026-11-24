@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useState } from "react";
@@ -7,6 +8,7 @@ import ProductList from "@/components/ProductList";
 import CartButton from "@/components/CartButton";
 import { useCart } from "@/components/CartContext";
 import { PRODUCTS, type Product } from "@/lib/products";
+import FlashSaleBanner from "@/components/FlashSaleBanner";
 
 export default function Home() {
   const [search, setSearch] = useState("");
@@ -42,10 +44,9 @@ export default function Home() {
 
   return (
     <main className="container py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      {/* Header Homepage */}
+      <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
         <div>
-          <h2 className="fw-bold mb-1">Dashboard</h2>
-
           <p className="text-muted mb-0">
             Selamat berbelanja di Digeboy.
           </p>
@@ -54,9 +55,16 @@ export default function Home() {
         <CartButton />
       </div>
 
+      {/* Flash Sale Banner */}
+      <div className="mb-4">
+        <FlashSaleBanner />
+      </div>
+
+      {/* Dashboard Banner */}
       <DashboardBanner />
 
-      <div className="mb-4">
+      {/* Pencarian Produk */}
+      <div className="mb-4 mt-4">
         <label
           htmlFor="product-search"
           className="form-label fw-semibold"
@@ -90,16 +98,19 @@ export default function Home() {
         </small>
       </div>
 
+      {/* Kategori */}
       <CategoryList
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
       />
 
+      {/* Produk */}
       <ProductList
         products={filteredProducts}
         onAddToCart={handleAddToCart}
       />
 
+      {/* Reset */}
       {search || selectedCategory !== "Semua" ? (
         <div className="text-center mt-4">
           <button

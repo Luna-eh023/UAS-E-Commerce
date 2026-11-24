@@ -1,7 +1,7 @@
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-import Script from "next/script";
 import Link from "next/link";
 
 import ThemeToggle from "@/components/ThemeToggle";
@@ -21,22 +21,14 @@ export const metadata: Metadata = {
   description: "E-Commerce Digeboy",
 };
 
-const themeScript = `(function(){try{var t=localStorage.getItem("theme");if(!t){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.setAttribute("data-bs-theme",t)}catch(e){}})();`;
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" data-bs-theme="light" suppressHydrationWarning>
+    <html lang="id" data-bs-theme="light">
       <body>
-        <Script
-          id="theme-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: themeScript }}
-        />
-
         <Providers>
           <header className="bg-body border-bottom shadow-sm sticky-top">
             <div className="container d-flex align-items-center justify-content-between py-3">
@@ -66,16 +58,15 @@ export default function RootLayout({
                 </Link>
 
                 <AuthNav />
-
                 <ThemeToggle />
               </div>
             </div>
           </header>
 
           {children}
-        </Providers>
 
-        <FlashSalePopup />
+          <FlashSalePopup />
+        </Providers>
       </body>
     </html>
   );
