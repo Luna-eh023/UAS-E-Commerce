@@ -5,12 +5,6 @@ export interface PaymentInput {
   amount: number;
 }
 
-export interface PaymentResult {
-  success: boolean;
-  transactionId?: string;
-  error?: string;
-}
-
 export function luhnCheck(cardNumber: string): boolean {
   const digits = cardNumber.replace(/\s+/g, "");
   if (!/^\d{13,19}$/.test(digits)) return false;
@@ -48,20 +42,4 @@ export function validatePayment(input: PaymentInput): string | null {
   if (!isCvcValid(input.cvc)) return "Invalid CVC";
   if (!(input.amount > 0)) return "Amount must be greater than zero";
   return null;
-}
-
-export type Gateway = (input: PaymentInput) => Promise<{ id: string }>;
-
-export async function processPayment(
-  input: PaymentInput,
-  gateway: Gateway
-): Promise<PaymentResult> {
-  const error = validatePayment(input);
-  if (error) return { success: false, error };
-  try {
-    const { id } = await gateway(input);
-    return { success: true, transactionId: id };
-  } catch {
-    return { success: false, error: "Payment declined. Please try again." };
-  }
 }

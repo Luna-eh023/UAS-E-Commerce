@@ -35,6 +35,7 @@ export type Order = {
   review: Review | null;
   refunded: boolean;
   refundedAt: string | null;
+  transactionId?: string;
 };
 
 type NewOrder = Omit<Order, "id">;
@@ -147,6 +148,27 @@ export async function refundOrder(orderId: string): Promise<void> {
     refunded: true,
     refundedAt: new Date().toISOString(),
   });
+}
+
+export async function createOrder(params: {
+  storeName: string;
+  items: OrderItem[];
+  transactionId: string;
+}): Promise<string> {
+  const newOrder: NewOrder = {
+    storeName: params.storeName,
+    items: params.items,
+    total: calcTotal(params.items),
+    status: "gudang",
+    createdAt: new Date().toISOString(),
+    arrivedAt: null,
+    review: null,
+    refunded: false,
+    refundedAt: null,
+    transactionId: params.transactionId,
+  };
+  const ref = await addDoc(collection(db, ORDERS), newOrder);
+  return ref.id;
 }
 
 export async function buyAgain(order: Order): Promise<void> {
