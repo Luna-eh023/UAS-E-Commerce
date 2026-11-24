@@ -20,9 +20,9 @@ export default function Home() {
         <p>Discover products and enjoy your shopping experience.</p>
 
         <div>
-          <Link href="/search">Explore Products</Link>
-          <Link href="/lacak-barang">Track Your Orders</Link>
-          <Link href="/chat">Contact Store</Link>
+          <h3>
+            Test link: /chat, /lacak-barang, /search
+          </h3>
         </div>
       </section>
     </main>
