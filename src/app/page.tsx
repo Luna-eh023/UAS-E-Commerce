@@ -1,69 +1,73 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+// src/app/page.tsx  (homepage at "/")
+"use client";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import "./components/geboy/geboy.css";
+import AccountProvider, { useAccount } from "./components/geboy/AccountProvider";
+import { fmtDate, watchVouchers, type Voucher } from "./lib/account";
 
-export default function Home() {
+function HomeContent() {
+  const { account, error } = useAccount();
+  const [vouchers, setVouchers] = useState<Voucher[]>([]);
+
+  const ready = !!account;
+  useEffect(() => {
+    if (!ready) return;
+    return watchVouchers(setVouchers);
+  }, [ready]);
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main className="gb-main">
+      {error && <div className="gb-error">Gagal terhubung ke Firestore: {error}</div>}
+      {!account && !error && <p className="gb-muted">Memuat...</p>}
+
+      {account && (
+        <>
+          <h1 className="gb-home-hello">Halo, {account.name.split(" ")[0]}!</h1>
+          <p className="gb-muted">Kelola akun, voucher, dan coin kamu di sini.</p>
+
+          <div className="gb-home-grid">
+            <Link href="/akun/profil" className="gb-home-card">
+              <h2>Profil Akun</h2>
+              {account.photoURL ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={account.photoURL} alt="Foto profil" className="gb-avatar gb-home-avatar" />
+              ) : (
+                <div className="gb-avatar gb-home-avatar">{account.name.charAt(0).toUpperCase()}</div>
+              )}
+              <div>
+                <strong>{account.name}</strong>
+                <div className="gb-muted">{account.email}</div>
+              </div>
+              <span className="gb-home-link">Lihat profil</span>
+            </Link>
+
+            <Link href="/akun/voucher" className="gb-home-card">
+              <h2>Voucher</h2>
+              <div className="gb-home-big">{vouchers.length}</div>
+              <div className="gb-muted">voucher tersedia</div>
+              <span className="gb-home-link">Lihat voucher</span>
+            </Link>
+
+            <Link href="/akun/bonus-coin" className="gb-home-card">
+              <h2>Bonus Coin</h2>
+              <div className="gb-home-big">{account.coins} Coin</div>
+              <div className="gb-muted">Berakhir {fmtDate(account.coinExpiry, "-")}</div>
+              <span className="gb-home-link">Dapatkan coin</span>
+            </Link>
+          </div>
+        </>
+      )}
+    </main>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <AccountProvider>
+      <div className="gb-shell">
+        <HomeContent />
+      </div>
+    </AccountProvider>
   );
 }

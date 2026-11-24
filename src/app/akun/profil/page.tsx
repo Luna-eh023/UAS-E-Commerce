@@ -1,20 +1,8 @@
 // src/app/akun/profil/page.tsx
 "use client";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useAccount } from "../../components/geboy/AccountProvider";
 import { updateProfile, type Gender } from "../../lib/account";
-
-// Teammates: build the other tabs as new pages (e.g. src/app/akun/profil/bank/page.tsx)
-// then set ready:true and the right href.
-const SUB_TABS = [
-  { label: "Profil", href: "/akun/profil", ready: true },
-  { label: "Bank & Kartu", href: "#", ready: false },
-  { label: "Alamat", href: "#", ready: false },
-  { label: "Ubah Password", href: "#", ready: false },
-  { label: "Pengaturan Notifikasi", href: "#", ready: false },
-  { label: "Pengaturan Privasi", href: "#", ready: false },
-];
 
 const GENDERS: Gender[] = ["Laki-laki", "Perempuan", "Lainnya"];
 
@@ -94,20 +82,6 @@ export default function ProfilePage() {
 
   return (
     <>
-      <div className="gb-tabs">
-        {SUB_TABS.map((t) =>
-          t.ready ? (
-            <Link key={t.label} href={t.href} className="gb-tab is-active">
-              {t.label}
-            </Link>
-          ) : (
-            <span key={t.label} className="gb-tab is-disabled" title="Coming soon">
-              {t.label}
-            </span>
-          )
-        )}
-      </div>
-
       <h1 className="gb-title">Profil</h1>
       {error && <div className="gb-error">Gagal terhubung ke Firestore: {error}</div>}
       {!account && !error && <p className="gb-muted">Memuat...</p>}
