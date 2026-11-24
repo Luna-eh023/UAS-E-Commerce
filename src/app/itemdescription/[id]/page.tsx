@@ -1,30 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import ShopHeader from "../../../components/ShopHeader";
+import "../../../components/shop.css";
 import ProductImage from "../../../components/ProductImage";
 import ProductCard from "../../../components/ProductCard";
 import { addToCart } from "../../../lib/cart";
+import { fetchProduct, fetchProductsOfStore, fetchStore } from "../../../lib/catalog";
 import {
-  STORES,
   discountPercent,
   formatSold,
-  getProduct,
-  getStore,
-  productsOfStore,
   rupiah,
   type Product,
+  type Store,
 } from "../../../lib/products";
 
 // Placeholder texts. Change them to match your real shipping and return rules.
 const SHIPPING_NOTE = "Estimated arrival in 2–4 days";
 const GUARANTEE_NOTE = "Free return · COD · Damage protection";
 
-function ItemView({ product }: { product: Product }) {
+function ItemView({ product, store, more }: { product: Product; store: Store; more: Product[] }) {
   const router = useRouter();
-  const store = getStore(product.storeId) ?? STORES[0];
   const images = product.images?.length ? product.images : [product.image];
 
   const [variant, setVariant] = useState(product.variants[0]);
@@ -36,7 +33,6 @@ function ItemView({ product }: { product: Product }) {
 
   const chosen = size ? `${variant} / ${size}` : variant;
   const off = discountPercent(product);
-  const more = productsOfStore(store.id).filter((p) => p.id !== product.id).slice(0, 5);
 
   function flash(msg: string) {
     setNotice(msg);
@@ -87,8 +83,6 @@ function ItemView({ product }: { product: Product }) {
 
   return (
     <div className="sh-page">
-      <ShopHeader storeId={store.id} />
-
       <main className="sh-wrap sh-section">
         <nav className="sh-crumbs" aria-label="Breadcrumb">
           <Link href="/">Home</Link>
@@ -306,25 +300,83 @@ function ItemView({ product }: { product: Product }) {
   );
 }
 
+const fallbackStore = (id: string): Store => ({
+  id,
+  name: id,
+  activeText: "",
+  followers: "-",
+  following: 0,
+  rating: 0,
+  ratingCount: "-",
+  joined: "-",
+  chatPerformance: "-",
+});
+
+type LoadState =
+  | { status: "loading" | "missing" | "error" }
+  | { status: "ready"; product: Product; store: Store; more: Product[] };
+
+function ItemLoader({ id }: { id: string }) {
+  const [state, setState] = useState<LoadState>({ status: "loading" });
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const product = await fetchProduct(id);
+        if (!product) {
+          if (!cancelled) setState({ status: "missing" });
+          return;
+        }
+        const [store, siblings] = await Promise.all([
+          fetchStore(product.storeId),
+          fetchProductsOfStore(product.storeId),
+        ]);
+        if (!cancelled) {
+          setState({
+            status: "ready",
+            product,
+            store: store ?? fallbackStore(product.storeId),
+            more: siblings.filter((p) => p.id !== product.id).slice(0, 5),
+          });
+        }
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) setState({ status: "error" });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  if (state.status === "ready") {
+    return <ItemView product={state.product} store={state.store} more={state.more} />;
+  }
+
+  return (
+    <div className="sh-page">
+      <main className="sh-wrap sh-section">
+        <div className="sh-box sh-empty">
+          {state.status === "loading" && <p>Loading product...</p>}
+          {state.status === "missing" && (
+            <>
+              <p>This product doesn&apos;t exist.</p>
+              <Link href="/storeinfo" className="sh-link">Back to the shop</Link>
+            </>
+          )}
+          {state.status === "error" && (
+            <p>Couldn&apos;t load the product. Check your Firebase config and Firestore rules.</p>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
+
 export default function ItemDescriptionPage() {
   const params = useParams();
   const id = String(params?.id ?? "");
-  const product = getProduct(id);
-
-  if (!product) {
-    return (
-      <div className="sh-page">
-        <ShopHeader />
-        <main className="sh-wrap sh-section">
-          <div className="sh-box sh-empty">
-            <p>This product doesn&apos;t exist.</p>
-            <Link href="/storeinfo" className="sh-link">Back to the shop</Link>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  // key resets the choices (variant, quantity...) when you open another product
-  return <ItemView key={product.id} product={product} />;
+  // key resets the page (loading, choices) when you open another product
+  return <ItemLoader key={id} id={id} />;
 }

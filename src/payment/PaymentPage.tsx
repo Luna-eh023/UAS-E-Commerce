@@ -26,8 +26,6 @@ interface Props {
   storeName: string;
   items: OrderItem[];
   savedCards?: SavedCard[];
-  userName?: string;
-  userRole?: string;
   /** Plug your payment provider call in here. Resolve with { id } or throw to decline. */
   gateway: (req: PayRequest) => Promise<{ id: string }>;
   /** Runs after a successful payment, e.g. save the order to Firestore. */
@@ -84,8 +82,6 @@ export default function PaymentPage({
   storeName,
   items,
   savedCards = [],
-  userName = "Guest",
-  userRole = "Customer",
   gateway,
   onSuccess,
 }: Props) {
@@ -172,37 +168,6 @@ export default function PaymentPage({
   return (
     <div className="pp-page">
       <div className="pp-shell">
-        <header className="pp-topbar">
-          <label className="pp-search">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="7" />
-              <path d="m20 20-3.5-3.5" />
-            </svg>
-            <input type="search" placeholder="Search" aria-label="Search" />
-          </label>
-          <div className="pp-top-right">
-            <button className="pp-icon-btn" aria-label="Messages">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="3" y="5" width="18" height="14" rx="2" />
-                <path d="m3 7 9 6 9-6" />
-              </svg>
-            </button>
-            <button className="pp-icon-btn" aria-label="Notifications">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-              </svg>
-            </button>
-            <div className="pp-user">
-              <span className="pp-avatar">{userName.charAt(0).toUpperCase()}</span>
-              <span className="pp-user__text">
-                <span className="pp-user__name">{userName}</span>
-                <span className="pp-user__role">{userRole}</span>
-              </span>
-            </div>
-          </div>
-        </header>
-
     <div className="pp">
       <section className="pp-main">
         <h1 className="pp-title">Select Payment method</h1>
