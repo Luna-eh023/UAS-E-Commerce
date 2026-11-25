@@ -1,0 +1,95 @@
+.stage {
+  --size: clamp(5rem, 17vw, 9.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--size) * 0.12);
+  padding-top: 1rem;
+}
+
+.digit {
+  font-size: var(--size);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--digeboy-green);
+}
+
+.face {
+  position: relative;
+  width: calc(var(--size) * 0.78);
+  height: calc(var(--size) * 0.78);
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8fe793, #03ac0e);
+  box-shadow: 0 10px 24px rgba(3, 172, 14, 0.35);
+  animation: float 3s ease-in-out infinite;
+}
+
+.eye {
+  position: absolute;
+  top: 30%;
+  width: 24%;
+  height: 24%;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eyeLeft {
+  left: 16%;
+}
+
+.eyeRight {
+  right: 16%;
+}
+
+.pupil {
+  width: 52%;
+  height: 52%;
+  border-radius: 50%;
+  background: #1b1b1b;
+  transform: translateY(25%);
+}
+
+.tear {
+  position: absolute;
+  top: 54%;
+  left: 23%;
+  width: 9%;
+  height: 13%;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: #29b6f6;
+}
+
+.mouth {
+  position: absolute;
+  left: 50%;
+  bottom: 18%;
+  width: 34%;
+  height: 16%;
+  transform: translateX(-50%);
+  border-top: calc(var(--size) * 0.04) solid #fff;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+
+.message {
+  max-width: 480px;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .face {
+    animation: none;
+  }
+}

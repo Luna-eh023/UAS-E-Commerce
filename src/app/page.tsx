@@ -1,69 +1,127 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+
+"use client";
+
+import { useMemo, useState } from "react";
+import DashboardBanner from "@/components/DashboardBanner";
+import CategoryList from "@/components/CategoryList";
+import ProductList from "@/components/ProductList";
+import CartButton from "@/components/CartButton";
+import { useCart } from "@/components/CartContext";
+import { PRODUCTS, type Product } from "@/lib/products";
+import FlashSaleBanner from "@/components/FlashSaleBanner";
 
 export default function Home() {
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Semua");
+
+  const { addToCart } = useCart();
+
+  const filteredProducts = useMemo(() => {
+    const searchKeyword = search.trim().toLowerCase();
+
+    return PRODUCTS.filter((product) => {
+      const matchesCategory =
+        selectedCategory === "Semua" ||
+        product.category === selectedCategory;
+
+      const matchesSearch =
+        product.name.toLowerCase().includes(searchKeyword) ||
+        product.category.toLowerCase().includes(searchKeyword) ||
+        product.description.toLowerCase().includes(searchKeyword);
+
+      return matchesCategory && matchesSearch;
+    });
+  }, [search, selectedCategory]);
+
+  function handleAddToCart(product: Product) {
+    addToCart(product);
+  }
+
+  function handleResetSearch() {
+    setSearch("");
+    setSelectedCategory("Semua");
+  }
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="container py-4">
+      {/* Header Homepage */}
+      <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+        <div>
+          <p className="text-muted mb-0">
+            Selamat berbelanja di Digeboy.
           </p>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <CartButton />
+      </div>
+
+      {/* Flash Sale Banner */}
+      <div className="mb-4">
+        <FlashSaleBanner />
+      </div>
+
+      {/* Dashboard Banner */}
+      <DashboardBanner />
+
+      {/* Pencarian Produk */}
+      <div className="mb-4 mt-4">
+        <label
+          htmlFor="product-search"
+          className="form-label fw-semibold"
+        >
+          Cari Produk
+        </label>
+
+        <div className="input-group">
+          <input
+            id="product-search"
+            type="text"
+            className="form-control form-control-lg"
+            placeholder="Cari nama, kategori, atau deskripsi..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+
+          {search && (
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={() => setSearch("")}
+            >
+              Hapus
+            </button>
+          )}
         </div>
-      </main>
-    </div>
+
+        <small className="text-muted mt-2 d-block">
+          Cari produk berdasarkan nama, kategori, atau deskripsi.
+        </small>
+      </div>
+
+      {/* Kategori */}
+      <CategoryList
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+      />
+
+      {/* Produk */}
+      <ProductList
+        products={filteredProducts}
+        onAddToCart={handleAddToCart}
+      />
+
+      {/* Reset */}
+      {search || selectedCategory !== "Semua" ? (
+        <div className="text-center mt-4">
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={handleResetSearch}
+          >
+            Reset Pencarian dan Kategori
+          </button>
+        </div>
+      ) : null}
+    </main>
   );
 }
