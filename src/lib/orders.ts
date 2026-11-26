@@ -26,6 +26,29 @@ export type Review = {
   createdAt: string;
 };
 
+export type PaymentStatus =
+  | "cod"
+  | "pending"
+  | "paid"
+  | "failed"
+  | "expired";
+
+export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
+  cod: "COD",
+  pending: "Menunggu Pembayaran",
+  paid: "Lunas",
+  failed: "Pembayaran Gagal",
+  expired: "Kadaluarsa",
+};
+
+export const PAYMENT_STATUS_COLOR: Record<PaymentStatus, string> = {
+  cod: "secondary",
+  pending: "warning",
+  paid: "success",
+  failed: "danger",
+  expired: "dark",
+};
+
 export type Order = {
   id: string;
   storeName: string;
@@ -46,6 +69,13 @@ export type Order = {
   shippingFee?: number;
   discount?: number;
   paymentMethod?: string;
+
+  // Midtrans payment fields
+  paymentStatus?: PaymentStatus;
+  snapToken?: string;
+  snapRedirectUrl?: string;
+  midtransOrderId?: string;
+  paidAt?: string;
 };
 
 type NewOrder = Omit<Order, "id">;
@@ -298,6 +328,27 @@ function normalizeOrder(id: string, rawData: Record<string, unknown>): Order {
       typeof rawData.paymentMethod === "string"
         ? rawData.paymentMethod
         : undefined,
+
+    paymentStatus:
+      typeof rawData.paymentStatus === "string"
+        ? (rawData.paymentStatus as PaymentStatus)
+        : undefined,
+
+    snapToken:
+      typeof rawData.snapToken === "string" ? rawData.snapToken : undefined,
+
+    snapRedirectUrl:
+      typeof rawData.snapRedirectUrl === "string"
+        ? rawData.snapRedirectUrl
+        : undefined,
+
+    midtransOrderId:
+      typeof rawData.midtransOrderId === "string"
+        ? rawData.midtransOrderId
+        : undefined,
+
+    paidAt:
+      typeof rawData.paidAt === "string" ? rawData.paidAt : undefined,
   };
 }
 

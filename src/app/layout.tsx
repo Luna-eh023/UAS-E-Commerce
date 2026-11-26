@@ -32,7 +32,11 @@ export default function RootLayout({
         <Providers>
           <header className="bg-body border-bottom shadow-sm sticky-top">
             <div className="container d-flex align-items-center justify-content-between py-3">
-              <div className="d-flex align-items-center gap-2">
+              <Link
+                href="/"
+                className="d-flex align-items-center gap-2 text-decoration-none"
+                aria-label="Kembali ke Dashboard Digeboy"
+              >
                 <span className={`logo-mark ${poppins.className}`}>
                   d
                 </span>
@@ -40,9 +44,16 @@ export default function RootLayout({
                 <span className={`logo-text ${poppins.className}`}>
                   digeboy
                 </span>
-              </div>
+              </Link>
 
               <div className="d-flex align-items-center gap-3 flex-wrap">
+                <Link
+                  href="/faq"
+                  className="text-muted text-decoration-none"
+                >
+                  FAQ
+                </Link>
+
                 <Link
                   href="/wishlist"
                   className="text-muted text-decoration-none"

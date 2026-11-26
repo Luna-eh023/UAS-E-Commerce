@@ -2,16 +2,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  registerUser,
-  loginWithGoogle,
-} from "@/lib/auth";
+import { registerUser, loginWithGoogle } from "@/lib/auth";
 
 export default function RegisterPage() {
-  const router = useRouter();
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -47,12 +41,12 @@ export default function RegisterPage() {
       await registerUser(name, email, password);
 
       setSuccess(
-        "Registrasi berhasil! Silakan cek email untuk verifikasi akun."
+        "Registrasi berhasil. Silakan cek email dan verifikasi akun sebelum login."
       );
 
       setTimeout(() => {
-        router.push("/");
-      }, 2500);
+        window.location.href = "/verify-email";
+      }, 1500);
     } catch (err: unknown) {
       const firebaseError = err as { code?: string };
 
@@ -84,11 +78,13 @@ export default function RegisterPage() {
 
     try {
       await loginWithGoogle();
-      router.push("/");
+      window.location.href = "/";
     } catch (err: unknown) {
-      const firebaseError = err as { code?: string };
+      const firebaseError = err as { code?: string; message?: string };
 
-      if (firebaseError.code === "auth/popup-closed-by-user") {
+      if (firebaseError.message === "EMAIL_NOT_VERIFIED") {
+        setError("Email Google belum terverifikasi.");
+      } else if (firebaseError.code === "auth/popup-closed-by-user") {
         setError("Popup login ditutup sebelum proses selesai.");
       } else if (
         firebaseError.code === "auth/account-exists-with-different-credential"
@@ -104,15 +100,10 @@ export default function RegisterPage() {
 
   return (
     <main className="container py-5">
-      <div
-        className="mx-auto"
-        style={{ maxWidth: "450px" }}
-      >
+      <div className="mx-auto" style={{ maxWidth: "450px" }}>
         <div className="card shadow-sm border-0">
           <div className="card-body p-4 p-md-5">
-            <h1 className="text-center mb-2">
-              Buat Akun
-            </h1>
+            <h1 className="text-center mb-2">Buat Akun</h1>
 
             <p className="text-center text-secondary mb-4">
               Bergabung dengan Digeboy Shop
@@ -132,10 +123,7 @@ export default function RegisterPage() {
 
             <form onSubmit={handleRegister}>
               <div className="mb-3">
-                <label className="form-label">
-                  Nama Lengkap
-                </label>
-
+                <label className="form-label">Nama Lengkap</label>
                 <input
                   type="text"
                   className="form-control"
@@ -148,10 +136,7 @@ export default function RegisterPage() {
               </div>
 
               <div className="mb-3">
-                <label className="form-label">
-                  Email
-                </label>
-
+                <label className="form-label">Email</label>
                 <input
                   type="email"
                   className="form-control"
@@ -164,10 +149,7 @@ export default function RegisterPage() {
               </div>
 
               <div className="mb-3">
-                <label className="form-label">
-                  Password
-                </label>
-
+                <label className="form-label">Password</label>
                 <input
                   type="password"
                   className="form-control"
@@ -184,14 +166,11 @@ export default function RegisterPage() {
                 <label className="form-label">
                   Konfirmasi Password
                 </label>
-
                 <input
                   type="password"
                   className="form-control"
                   value={confirmPassword}
-                  onChange={(e) =>
-                    setConfirmPassword(e.target.value)
-                  }
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Ulangi password"
                   required
                   disabled={loading}
@@ -203,9 +182,7 @@ export default function RegisterPage() {
                 className="btn btn-primary w-100"
                 disabled={loading}
               >
-                {loading
-                  ? "Memproses..."
-                  : "Daftar"}
+                {loading ? "Memproses..." : "Daftar"}
               </button>
             </form>
 
@@ -224,9 +201,7 @@ export default function RegisterPage() {
 
             <p className="text-center mt-4 mb-0">
               Sudah punya akun?{" "}
-              <Link href="/login">
-                Login
-              </Link>
+              <Link href="/login">Login</Link>
             </p>
           </div>
         </div>

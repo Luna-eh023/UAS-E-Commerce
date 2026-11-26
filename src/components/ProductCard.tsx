@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -62,33 +63,32 @@ export default function ProductCard({
   }
 
   return (
-    <div className="card h-100 border-0 shadow-sm product-card">
-      <div className="position-relative bg-body-tertiary rounded-top overflow-hidden">
+    <div className="card h-100 border-0 shadow-sm overflow-hidden">
+      {/* Gambar */}
+      <div className="position-relative bg-body-tertiary">
         <Link
           href={`/product/${product.id}`}
-          className="d-block text-decoration-none"
-          aria-label={`Lihat detail ${product.name}`}
+          className="d-block"
         >
           <Image
             src={product.image}
             alt={product.name}
             width={400}
             height={300}
-            className="w-100 product-image"
-            style={{ objectFit: "contain" }}
+            className="w-100"
+            style={{
+              objectFit: "contain",
+              height: "220px",
+            }}
           />
         </Link>
 
+        {/* Wishlist */}
         <button
           type="button"
           onClick={handleWishlist}
           disabled={wishlistLoading || authLoading}
           aria-label={
-            favorite
-              ? "Hapus dari wishlist"
-              : "Tambah ke wishlist"
-          }
-          title={
             favorite
               ? "Hapus dari wishlist"
               : "Tambah ke wishlist"
@@ -108,16 +108,14 @@ export default function ProductCard({
               color: favorite ? "#dc3545" : "#6c757d",
             }}
           >
-            {favorite ? "\u2665" : "\u2661"}
+            {favorite ? "♥" : "♡"}
           </span>
         </button>
       </div>
 
+      {/* Informasi */}
       <div className="card-body d-flex flex-column">
-        <span className="badge text-bg-light align-self-start mb-2">
-          {product.category}
-        </span>
-
+        {/* Nama */}
         <Link
           href={`/product/${product.id}`}
           className="text-decoration-none text-body"
@@ -127,45 +125,53 @@ export default function ProductCard({
           </h6>
         </Link>
 
-        <p className="text-muted small mb-3">
-          {product.description}
+        {/* Rating */}
+        <div className="mb-2">
+          <span className="text-warning">
+            {"★".repeat(Math.floor(product.rating))}
+            {product.rating % 1 >= 0.5 ? "½" : ""}
+          </span>
+
+          <span className="text-muted small ms-1">
+            {product.rating.toFixed(1)}
+            {" "}({product.reviewCount})
+          </span>
+        </div>
+
+        {/* Harga */}
+        <p className="fw-bold text-success mb-3">
+          {formatRupiah(product.price)}
         </p>
 
-        <div className="mt-auto">
-          <p className="fw-bold text-success mb-3">
-            {formatRupiah(product.price)}
-          </p>
+        {/* Feedback */}
+        {feedback && (
+          <div className="small mb-2 text-muted">
+            {feedback}
 
-          {feedback && (
-            <div className="small mb-2 text-muted">
-              {feedback}
+            {!user && !authLoading && (
+              <Link href="/login" className="ms-1">
+                Login
+              </Link>
+            )}
+          </div>
+        )}
 
-              {!user && !authLoading && (
-                <Link
-                  href="/login"
-                  className="ms-1"
-                >
-                  Login
-                </Link>
-              )}
-            </div>
-          )}
+        {/* Tombol Keranjang */}
+        <button
+          type="button"
+          className="btn btn-success w-100 mb-2"
+          onClick={() => onAddToCart(product)}
+        >
+          + Keranjang
+        </button>
 
-          <button
-            type="button"
-            className="btn btn-success w-100"
-            onClick={() => onAddToCart(product)}
-          >
-            + Tambah ke Keranjang
-          </button>
-
-          <Link
-            href={`/product/${product.id}`}
-            className="btn btn-outline-secondary w-100 mt-2"
-          >
-            Lihat Detail
-          </Link>
-        </div>
+        {/* Tombol Detail */}
+        <Link
+          href={`/product/${product.id}`}
+          className="btn btn-outline-secondary w-100"
+        >
+          Detail Produk
+        </Link>
       </div>
     </div>
   );

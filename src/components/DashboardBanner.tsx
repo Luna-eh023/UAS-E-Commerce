@@ -1,3 +1,6 @@
+
+import Link from "next/link";
+
 export default function DashboardBanner() {
   return (
     <section className="bg-success text-white rounded-4 p-4 p-md-5 mb-4 overflow-hidden">
@@ -18,12 +21,12 @@ export default function DashboardBanner() {
             dengan mudah di Digeboy.
           </p>
 
-          <a
-            href="#produk"
+          <Link
+            href="/produk"
             className="btn btn-light text-success fw-semibold px-4"
           >
             Jelajahi Produk
-          </a>
+          </Link>
         </div>
 
         <div className="col-md-4 text-center mt-4 mt-md-0">

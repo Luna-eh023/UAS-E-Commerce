@@ -1,3 +1,4 @@
+
 import type { Product } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 
@@ -11,7 +12,7 @@ export default function ProductList({
   onAddToCart,
 }: ProductListProps) {
   return (
-    <section id="produk">
+    <section>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4 className="fw-bold mb-0">Produk Pilihan</h4>
 
