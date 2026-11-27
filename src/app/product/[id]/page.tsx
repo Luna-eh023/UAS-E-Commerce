@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -18,6 +19,21 @@ function formatRupiah(value: number) {
   }).format(value);
 }
 
+function RatingStars({ rating }: { rating: number }) {
+  return (
+    <div className="mb-3">
+      <span className="text-warning">
+        {"★".repeat(Math.floor(rating))}
+        {rating % 1 >= 0.5 ? "½" : ""}
+      </span>
+
+      <span className="text-muted ms-2">
+        {rating.toFixed(1)}
+      </span>
+    </div>
+  );
+}
+
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -33,7 +49,6 @@ export default function ProductDetailPage() {
   const [error, setError] = useState("");
   const [wishlistLoading, setWishlistLoading] = useState(false);
 
-  // Produk tidak ditemukan
   if (!product) {
     return (
       <main className="container py-5">
@@ -52,7 +67,6 @@ export default function ProductDetailPage() {
     );
   }
 
-  // Simpan ID setelah produk dipastikan tersedia
   const productId = product.id;
   const favorite = isWishlisted(productId);
 
@@ -100,6 +114,7 @@ export default function ProductDetailPage() {
 
   return (
     <main className="container py-4 py-md-5">
+      {/* Tombol Kembali */}
       <div className="mb-4">
         <button
           type="button"
@@ -110,6 +125,7 @@ export default function ProductDetailPage() {
         </button>
       </div>
 
+      {/* Notifikasi */}
       {message && (
         <div className="alert alert-success">
           {message}
@@ -129,6 +145,7 @@ export default function ProductDetailPage() {
       )}
 
       <div className="row g-4 g-lg-5">
+        {/* Gambar */}
         <div className="col-12 col-md-6">
           <div className="bg-body-tertiary rounded-4 p-3 p-md-4">
             <Image
@@ -146,6 +163,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
+        {/* Informasi Produk */}
         <div className="col-12 col-md-6">
           <div className="d-flex flex-column h-100">
             <span className="badge text-bg-light align-self-start mb-3">
@@ -156,9 +174,27 @@ export default function ProductDetailPage() {
               {product.name}
             </h1>
 
+            <RatingStars rating={product.rating} />
+
+            <p className="text-muted small mb-3">
+              {product.reviewCount} ulasan
+            </p>
+
             <h3 className="text-success fw-bold mb-4">
               {formatRupiah(product.price)}
             </h3>
+
+            <hr />
+
+            <div className="mb-4">
+              <h5 className="fw-bold mb-2">
+                Nama Toko
+              </h5>
+
+              <p className="mb-0">
+                {product.storeName}
+              </p>
+            </div>
 
             <hr />
 
@@ -170,6 +206,7 @@ export default function ProductDetailPage() {
               {product.description}
             </p>
 
+            {/* Tombol */}
             <div className="mt-auto d-grid gap-3">
               <button
                 type="button"

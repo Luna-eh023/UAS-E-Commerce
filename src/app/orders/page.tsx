@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Script from "next/script";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
@@ -27,6 +28,23 @@ import {
   submitReview,
 } from "@/lib/orders";
 
+// Deklarasi global window.snap (dari Midtrans Snap.js)
+declare global {
+  interface Window {
+    snap?: {
+      pay: (
+        token: string,
+        callbacks: {
+          onSuccess?: (result: unknown) => void;
+          onPending?: (result: unknown) => void;
+          onError?: (result: unknown) => void;
+          onClose?: () => void;
+        }
+      ) => void;
+    };
+  }
+}
+
 type Filter = "semua" | OrderStatus;
 
 type ToastState = {
@@ -42,6 +60,8 @@ export default function OrdersPage() {
   const [error, setError] = useState("");
   const [filter, setFilter] = useState<Filter>("semua");
   const [search, setSearch] = useState("");
+  const [payingOrder, setPayingOrder] = useState<Order | null>(null);
+  void payingOrder; // consumed by handlePay callbacks
 
   const [reviewTarget, setReviewTarget] = useState<Order | null>(null);
   const [rating, setRating] = useState(0);
@@ -58,11 +78,39 @@ export default function OrdersPage() {
   useEffect(() => {
     let active = true;
 
-    getOrders()
-      .then(backfillStoreLogos)
-      .then((data) => {
-        if (active) setOrders(data);
-      })
+    const loadOrders = async () => {
+      const successOrderId = new URLSearchParams(window.location.search).get(
+        "success"
+      );
+
+      if (successOrderId) {
+        try {
+          const response = await fetch("/api/orders/sync-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderId: successOrderId }),
+          });
+
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || "Status pembayaran belum tersinkron.");
+          }
+        } catch (err) {
+          console.error("Gagal menyinkronkan pembayaran:", err);
+          if (active) {
+            showToast(
+              "Pembayaran berhasil, tetapi status pesanan belum tersinkron. Coba muat ulang halaman.",
+              "danger"
+            );
+          }
+        }
+      }
+
+      const data = await getOrders().then(backfillStoreLogos);
+      if (active) setOrders(data);
+    };
+
+    loadOrders()
       .catch((err) => {
         console.error(err);
 
@@ -123,6 +171,44 @@ export default function OrdersPage() {
       () => buyAgain(order),
       "Pesanan baru dibuat dan masuk ke tab Di Gudang."
     );
+
+  // --- Bayar ulang pesanan Midtrans pending ---
+  const handlePay = (order: Order) => {
+    if (!order.snapToken) return;
+    setPayingOrder(order);
+
+    if (!window.snap) {
+      showToast("Snap.js belum siap, muat ulang halaman.", "danger");
+      setPayingOrder(null);
+      return;
+    }
+
+    window.snap.pay(order.snapToken, {
+      onSuccess: async () => {
+        // Sinkronisasi status ke Firestore via API
+        await fetch("/api/orders/sync-payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId: order.id }),
+        }).catch(console.error);
+        await refresh();
+        showToast("Pembayaran berhasil! Pesanan diproses.", "success");
+        setPayingOrder(null);
+      },
+      onPending: async () => {
+        await refresh();
+        showToast("Pembayaran masih menunggu konfirmasi.", "success");
+        setPayingOrder(null);
+      },
+      onError: () => {
+        showToast("Pembayaran gagal. Coba lagi.", "danger");
+        setPayingOrder(null);
+      },
+      onClose: () => {
+        setPayingOrder(null);
+      },
+    });
+  };
 
   const openReview = (order: Order) => {
     if (busy) return;
@@ -200,8 +286,19 @@ export default function OrdersPage() {
   const countOf = (status: OrderStatus) =>
     searched.filter((o) => o.status === status).length;
 
+  const SNAP_JS_URL =
+    process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === "true"
+      ? "https://app.midtrans.com/snap/snap.js"
+      : "https://app.sandbox.midtrans.com/snap/snap.js";
+
   return (
-    <main className="container py-4">
+    <>
+      <Script
+        src={SNAP_JS_URL}
+        data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
+        strategy="afterInteractive"
+      />
+      <main className="container py-4">
       <div className="input-group input-group-lg mb-4 shadow-sm rounded-pill">
         <span className="input-group-text bg-body rounded-start-pill ps-4">
           <svg
@@ -315,6 +412,7 @@ export default function OrdersPage() {
           onReview={openReview}
           onBuyAgain={handleBuyAgain}
           onRefund={setRefundTarget}
+          onPay={handlePay}
         />
       ))}
 
@@ -460,5 +558,6 @@ export default function OrdersPage() {
         </Toast>
       </ToastContainer>
     </main>
+    </>
   );
 }

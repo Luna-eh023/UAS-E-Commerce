@@ -5,6 +5,8 @@ import Badge from "react-bootstrap/Badge";
 import Button from "react-bootstrap/Button";
 import {
   Order,
+  PAYMENT_STATUS_COLOR,
+  PAYMENT_STATUS_LABEL,
   STATUS_COLOR,
   STATUS_FLOW,
   STATUS_LABEL,
@@ -22,6 +24,7 @@ type OrderCardProps = {
   onReview: (order: Order) => void;
   onBuyAgain: (order: Order) => void;
   onRefund: (order: Order) => void;
+  onPay?: (order: Order) => void;
 };
 
 export default function OrderCard({
@@ -30,6 +33,7 @@ export default function OrderCard({
   onReview,
   onBuyAgain,
   onRefund,
+  onPay,
 }: OrderCardProps) {
   const stepIndex = STATUS_FLOW.indexOf(order.status);
   const isArrived = order.status === "sampai";
@@ -46,10 +50,16 @@ export default function OrderCard({
     order.shippingFee !== undefined ||
     order.discount !== undefined;
 
+  // Tampilkan tombol "Bayar Sekarang" hanya jika pending dan ada token
+  const canPay =
+    order.paymentStatus === "pending" &&
+    order.snapToken &&
+    !order.refunded;
+
   return (
     <div className="card mb-3 border-0 shadow-sm overflow-hidden">
       <div className="card-header bg-body d-flex justify-content-between align-items-center py-3 px-4">
-        <div className="d-flex align-items-center gap-2">
+        <div className="d-flex align-items-center gap-2 flex-wrap">
           {order.storeLogo ? (
             <Image
               src={order.storeLogo}
@@ -75,21 +85,39 @@ export default function OrderCard({
           </span>
         </div>
 
-        {order.refunded ? (
-          <Badge bg="dark">Dana Dikembalikan</Badge>
-        ) : (
-          <Badge bg={STATUS_COLOR[order.status]}>
-            {STATUS_LABEL[order.status]}
-          </Badge>
-        )}
+        <div className="d-flex gap-2 align-items-center flex-wrap">
+          {/* Badge status pembayaran */}
+          {order.paymentStatus && (
+            <Badge
+              bg={PAYMENT_STATUS_COLOR[order.paymentStatus]}
+              className="text-dark"
+              style={
+                order.paymentStatus === "pending"
+                  ? { background: "#ffc107" }
+                  : {}
+              }
+            >
+              {PAYMENT_STATUS_LABEL[order.paymentStatus]}
+            </Badge>
+          )}
+
+          {/* Badge status pengiriman */}
+          {order.refunded ? (
+            <Badge bg="dark">Dana Dikembalikan</Badge>
+          ) : (
+            <Badge bg={STATUS_COLOR[order.status]}>
+              {STATUS_LABEL[order.status]}
+            </Badge>
+          )}
+        </div>
       </div>
 
       <div className="row g-0">
         <div className="col-lg-8 p-4">
+          {/* Stepper status pengiriman */}
           <div className="d-flex mb-4">
             {STATUS_FLOW.map((step, i) => {
               const done = i <= stepIndex;
-
               return (
                 <div key={step} className="flex-fill text-center small">
                   <div
@@ -100,7 +128,6 @@ export default function OrderCard({
                   >
                     {done ? "✓" : i + 1}
                   </div>
-
                   <span className={done ? "fw-semibold" : "text-muted"}>
                     {STATUS_LABEL[step]}
                   </span>
@@ -109,10 +136,10 @@ export default function OrderCard({
             })}
           </div>
 
+          {/* Alert sampai tujuan */}
           {isArrived && order.arrivedAt && (
             <div className="alert alert-success py-2 small">
               Sampai tujuan pada <b>{formatTanggal(order.arrivedAt)}</b>
-
               {!order.refunded && (
                 <div className="mt-1">
                   {refundable
@@ -125,18 +152,15 @@ export default function OrderCard({
             </div>
           )}
 
+          {/* Informasi pengiriman & pembayaran */}
           {hasCheckoutInfo && (
             <div className="bg-body-tertiary rounded-3 p-3 mb-4">
-              <h6 className="fw-bold mb-3">
-                Informasi Pengiriman & Pembayaran
-              </h6>
+              <h6 className="fw-bold mb-3">Informasi Pengiriman &amp; Pembayaran</h6>
 
               {order.recipientName && (
                 <div className="mb-2">
                   <div className="text-muted small">Nama Penerima</div>
-                  <div className="fw-semibold">
-                    {order.recipientName}
-                  </div>
+                  <div className="fw-semibold">{order.recipientName}</div>
                 </div>
               )}
 
@@ -168,6 +192,15 @@ export default function OrderCard({
                 </div>
               )}
 
+              {order.paidAt && (
+                <div className="mb-2">
+                  <div className="text-muted small">Dibayar Pada</div>
+                  <div className="text-success fw-semibold">
+                    {formatTanggal(order.paidAt)}
+                  </div>
+                </div>
+              )}
+
               {order.shippingFee !== undefined && (
                 <div className="d-flex justify-content-between mt-3">
                   <span className="text-muted">Biaya Pengiriman</span>
@@ -186,10 +219,10 @@ export default function OrderCard({
             </div>
           )}
 
+          {/* Daftar item */}
           <ul className="list-unstyled mb-0">
             {order.items.map((item, i) => {
               const image = getItemImage(item);
-
               return (
                 <li
                   key={`${item.name}-${i}`}
@@ -212,17 +245,12 @@ export default function OrderCard({
                       item.name.charAt(0)
                     )}
                   </div>
-
                   <div className="flex-grow-1">
                     <div className="fw-semibold">{item.name}</div>
-
                     {item.variant && (
-                      <div className="text-muted small">
-                        {item.variant}
-                      </div>
+                      <div className="text-muted small">{item.variant}</div>
                     )}
                   </div>
-
                   <div className="text-end">
                     <div>{formatRupiah(item.price)}</div>
                     <div className="text-muted small">x{item.qty}</div>
@@ -233,11 +261,11 @@ export default function OrderCard({
           </ul>
         </div>
 
+        {/* ===== Kolom kanan ===== */}
         <div className="col-lg-4 p-4 order-side d-flex flex-column">
           <div className="text-muted small">
             Total Belanja ({totalQty} barang)
           </div>
-
           <div className="fw-bold fs-3 mb-3" style={{ color: "#03ac0e" }}>
             {formatRupiah(order.total)}
           </div>
@@ -248,20 +276,23 @@ export default function OrderCard({
                 {"★".repeat(order.review.rating)}
                 {"☆".repeat(5 - order.review.rating)}
               </div>
-
-              {order.review.comment && (
-                <div>{order.review.comment}</div>
-              )}
+              {order.review.comment && <div>{order.review.comment}</div>}
             </div>
           )}
 
           <div className="d-grid gap-2 mt-auto">
+            {/* Tombol Bayar Sekarang untuk Midtrans pending */}
+            {canPay && onPay && (
+              <Button variant="success" onClick={() => onPay(order)}>
+                💳 Bayar Sekarang
+              </Button>
+            )}
+
             {isArrived ? (
               <>
                 <Button variant="primary" onClick={() => onBuyAgain(order)}>
                   Beli Lagi
                 </Button>
-
                 {!order.review && (
                   <Button
                     variant="outline-primary"
@@ -270,7 +301,6 @@ export default function OrderCard({
                     Tulis Ulasan
                   </Button>
                 )}
-
                 {refundable && (
                   <Button
                     variant="outline-danger"
@@ -281,7 +311,8 @@ export default function OrderCard({
                 )}
               </>
             ) : (
-              nextStatus && (
+              nextStatus &&
+              !canPay && (
                 <Button
                   variant="outline-primary"
                   size="sm"

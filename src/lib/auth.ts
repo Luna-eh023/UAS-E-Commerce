@@ -1,3 +1,4 @@
+
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -29,6 +30,7 @@ export async function registerUser(
 
   await sendEmailVerification(credential.user);
 
+  // Tetap login sementara untuk halaman verifikasi
   return credential.user;
 }
 
@@ -40,13 +42,25 @@ export async function loginUser(email: string, password: string) {
     password
   );
 
+  if (!credential.user.emailVerified) {
+    await signOut(auth);
+    throw new Error("EMAIL_NOT_VERIFIED");
+  }
+
   return credential.user;
 }
 
 // LOGIN GOOGLE
 export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+
   const result = await signInWithPopup(auth, provider);
+
+  if (!result.user.emailVerified) {
+    await signOut(auth);
+    throw new Error("EMAIL_NOT_VERIFIED");
+  }
 
   return result.user;
 }

@@ -4,10 +4,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  loginUser,
-  loginWithGoogle,
-} from "@/lib/auth";
+import { loginUser, loginWithGoogle } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,24 +21,28 @@ export default function LoginPage() {
 
     try {
       await loginUser(email, password);
-      router.push("/");
+      router.replace("/");
     } catch (err: unknown) {
-      const firebaseError = err as { code?: string };
+      const error = err as { code?: string; message?: string };
 
-      switch (firebaseError.code) {
-        case "auth/invalid-credential":
-        case "auth/wrong-password":
-        case "auth/user-not-found":
-          setError("Email atau password salah.");
-          break;
-        case "auth/invalid-email":
-          setError("Format email tidak valid.");
-          break;
-        case "auth/too-many-requests":
-          setError("Terlalu banyak percobaan. Coba lagi nanti.");
-          break;
-        default:
-          setError("Login gagal. Silakan coba lagi.");
+      if (error.message === "EMAIL_NOT_VERIFIED") {
+        setError("Email belum diverifikasi. Silakan verifikasi email terlebih dahulu.");
+      } else {
+        switch (error.code) {
+          case "auth/invalid-credential":
+          case "auth/wrong-password":
+          case "auth/user-not-found":
+            setError("Email atau password salah.");
+            break;
+          case "auth/invalid-email":
+            setError("Format email tidak valid.");
+            break;
+          case "auth/too-many-requests":
+            setError("Terlalu banyak percobaan. Coba lagi nanti.");
+            break;
+          default:
+            setError("Login gagal. Silakan coba lagi.");
+        }
       }
     } finally {
       setLoading(false);
@@ -54,14 +55,16 @@ export default function LoginPage() {
 
     try {
       await loginWithGoogle();
-      router.push("/");
+      router.replace("/");
     } catch (err: unknown) {
-      const firebaseError = err as { code?: string };
+      const error = err as { code?: string; message?: string };
 
-      if (firebaseError.code === "auth/popup-closed-by-user") {
+      if (error.message === "EMAIL_NOT_VERIFIED") {
+        setError("Email Google belum terverifikasi.");
+      } else if (error.code === "auth/popup-closed-by-user") {
         setError("Popup login ditutup sebelum proses selesai.");
       } else if (
-        firebaseError.code === "auth/account-exists-with-different-credential"
+        error.code === "auth/account-exists-with-different-credential"
       ) {
         setError("Email sudah terdaftar dengan metode login berbeda.");
       } else {
@@ -77,9 +80,7 @@ export default function LoginPage() {
       <div className="mx-auto" style={{ maxWidth: "450px" }}>
         <div className="card shadow-sm border-0">
           <div className="card-body p-4 p-md-5">
-            <h1 className="text-center mb-2">
-              Login
-            </h1>
+            <h1 className="text-center mb-2">Login</h1>
 
             <p className="text-center text-secondary mb-4">
               Selamat datang kembali di Digeboy Shop
@@ -93,10 +94,7 @@ export default function LoginPage() {
 
             <form onSubmit={handleLogin}>
               <div className="mb-3">
-                <label className="form-label">
-                  Email
-                </label>
-
+                <label className="form-label">Email</label>
                 <input
                   type="email"
                   className="form-control"
@@ -109,10 +107,7 @@ export default function LoginPage() {
               </div>
 
               <div className="mb-4">
-                <label className="form-label">
-                  Password
-                </label>
-
+                <label className="form-label">Password</label>
                 <input
                   type="password"
                   className="form-control"
@@ -154,9 +149,7 @@ export default function LoginPage() {
 
             <p className="text-center mt-4 mb-0">
               Belum punya akun?{" "}
-              <Link href="/register">
-                Daftar
-              </Link>
+              <Link href="/register">Daftar</Link>
             </p>
           </div>
         </div>
